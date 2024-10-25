@@ -267,6 +267,7 @@ def getSnapData(mux_sel, wrap=True):
     return _getSnapData(chan, int(mux_sel), wrap=wrap)
 
 def getADCrms():
+    import numpy as np
     chan = cfg.drid
     I, Q = _getSnapData(chan,0,wrap=False)
     z = I + 1j*Q
