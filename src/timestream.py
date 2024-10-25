@@ -59,6 +59,10 @@ class TimeStream:
 
         # I, Q = x[:,16::2].T, x[:,17::2].T
         I, Q = x[:,0::2].T, x[:,1::2].T
+
+        # max number of useable channels
+        I = I[:1022]
+        Q = Q[:1022]
         
         return I, Q
 
