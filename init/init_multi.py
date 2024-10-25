@@ -5,19 +5,19 @@ import xrfdc
 import sys
 import os
 
-# par_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# sys.path.insert(1, os.path.realpath(par_dir) + '/src')
-sys.path.insert(1, os.path.join(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 
-    'src'))
+# Determine the directory where the script is located
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+# add src/ to path (where most of the other scripts live)
+sys.path.insert(1, os.path.join(os.path.dirname(script_dir), 'src'))
 
 import ip_addr
 from config import board as cfg
 
 import subprocess
 
-try:
 
+try:
 
 # ============================================================================ #
 # Firmware, PTP, clocks
@@ -33,8 +33,10 @@ try:
     subprocess.run(["ifconfig", cfg.ptp_interface, cfg.ptp_ip_address, "up"])
 
     # Pass the MAC address and interface to the PTP and PHC scripts
-    subprocess.run(["./run_ptp4l.sh", cfg.ptp_interface, cfg.ptp_mac_address])
-    subprocess.run(["./run_phc2sys.sh", cfg.ptp_interface])
+    run_ptp4l_path = os.path.join(script_dir, 'run_ptp4l.sh')
+    subprocess.run([run_ptp4l_path, cfg.ptp_interface, cfg.ptp_mac_address])
+    run_phc2sys_path = os.path.join(script_dir, 'run_phc2sys.sh')
+    subprocess.run([run_phc2sys_path, cfg.ptp_interface])
 
     print("PTP configured")
 
