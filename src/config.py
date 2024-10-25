@@ -8,16 +8,17 @@
 
 import sys, os
 
+
 def thisDir(file):
-    this_path = os.path.abspath(file)
-    this_dir = os.path.dirname(this_path)
-    return this_dir
+    '''Directort where given file is located.'''
+    return os.path.dirname(os.path.abspath(file))
+    # return os.path.dirname(os.path.realpath(file))
+
 
 def parentDir(file):
-    # this_path = os.path.abspath(file)
-    # this_dir = os.path.dirname(this_path)
-    par_dir = os.path.dirname(thisDir(file))
-    return par_dir
+    '''Parent directory of given file.'''
+    return os.path.dirname(thisDir(file))
+
 
 # add parent dir to path (where cfg/ is)
 sys.path.insert(1, parentDir(__file__))
