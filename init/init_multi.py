@@ -4,7 +4,12 @@ import xrfdc
 
 import sys
 import os
-sys.path.insert(1, os.path.realpath(os.path.pardir) + '/src')
+
+# par_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# sys.path.insert(1, os.path.realpath(par_dir) + '/src')
+sys.path.insert(1, os.path.join(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 
+    'src'))
 
 import ip_addr
 from config import board as cfg
