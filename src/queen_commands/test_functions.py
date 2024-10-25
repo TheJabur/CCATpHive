@@ -101,7 +101,70 @@ def tonePowerTest():
         
  
  # ============================================================================ #
-# tonePowerTest
+# adriansNoiseTest
+def adriansNoiseTest():
+    """
+
+    Queen listen mode must be running to intercept all the files.
+    """
+
+    print("Running adriansNoiseTest()...")
+
+    bid = 1
+    drid = 1
+    nclo = 500
+    t_tod = 10
+
+    fnclos = np.logspace(-4, 0, 10)
+
+    def sendCom(com_str, args_str=None):
+        com_num = alcove.comNumFromStr(com_str)
+        return queen.alcoveCommand(
+            com_num, bid=bid, drid=drid, all_boards=False, args=args_str)
+    
+    def capTOD(t, fnclo):
+        # save timestream
+        ip = "192.168.3.40"
+        port = 4096
+        # packets = t*489
+        packets = int(t*512e6/2**20)
+        I,Q = captureTimestream(packets, ip, port)
+        # power: I[kid_id]**2 + Q[kid_id]**2
+        # phase: np.arctan2(Q[kid_id], I[kid_id])
+        fname = io.saveToTmp(np.array([I, Q]), filename=f'timestream_{fnclo}', use_timestamp=True)
+
+
+    try: 
+
+        print("   Setting NCLO... ", end="", flush=True)
+        sendCom("setNCLO", nclo)
+        print("Done.")
+
+        
+        print("   Performing target sweep... ", end="", flush=True)
+        sendCom("sweeps.targetSweep")
+        print("Done.")
+
+        print("   Looping over fine NCLOs...")
+            for fnclo in fnclos:
+            
+                print("   Setting fine NCLO... ", end="", flush=True)
+                sendCom("setFineNCLO", fnclo)
+                print("Done.")
+
+                time.sleep(1) # dont catch blip
+
+                # capture timestream
+                print("   Capturing timestream...", end="", flush=True)
+                capTOD(t_tod, fnclo)
+                print("Done.")
+
+        print("Well Done! :)")
+
+    except Exception: 
+        traceback.print_exc()
+
+'''
 def tonysHeatingTest():
     """
 
@@ -113,6 +176,10 @@ def tonysHeatingTest():
     bid = 1
     drid = 1
     nclo = 500
+
+    time_to_run = 
+    time_between_sweeps = 
+    time_tod = # tod length per temperature
 
     def sendCom(com_str, args_str=None):
         com_num = alcove.comNumFromStr(com_str)
@@ -147,4 +214,4 @@ def tonysHeatingTest():
 
     except Exception: 
         traceback.print_exc()
-        
+'''
