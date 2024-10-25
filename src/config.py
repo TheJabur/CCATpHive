@@ -20,8 +20,11 @@ def parentDir(file):
     return os.path.dirname(thisDir(file))
 
 
-# add parent dir to path (where cfg/ is)
-sys.path.insert(1, parentDir(__file__))
+# define primecam_readout base dir
+dir_root = parentDir(__file__)
+
+# add parent dir to path
+sys.path.insert(1, dir_root)
 
 try:
     from cfg import _cfg_queen as queen

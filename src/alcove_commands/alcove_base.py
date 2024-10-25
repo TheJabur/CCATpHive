@@ -23,7 +23,8 @@ try:
     from pynq import Overlay
     
     # FIRMWARE UPLOAD
-    firmware = Overlay(cfg.firmware_file, ignore_version=True, download=False)
+    firmware_file = os.path.join(cfg.dir_root, cfg.firmware_file)
+    firmware = Overlay(firmware_file, ignore_version=True, download=False)
 
 except Exception as e: 
     firmware = None

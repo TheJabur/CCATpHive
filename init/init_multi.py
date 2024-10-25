@@ -22,7 +22,9 @@ try:
 # ============================================================================ #
 # Firmware, PTP, clocks
 
-    firmware = Overlay(cfg.firmware_file, ignore_version=True)
+    # assuming cfg.firmware_file is a local filename
+    firmware_file = os.path.join(cfg.dir_root, cfg.firmware_file)
+    firmware = Overlay(firmware_file, ignore_version=True)
 
     clksrc = 409.6 # MHz
     xrfclk.set_all_ref_clks(clksrc)
@@ -44,7 +46,7 @@ try:
     rf_data_conv = firmware.usp_rf_data_converter_0
 
     # chan: [adc tiles, adc blocks, dac tiles, dac blocks]
-    name = os.path.splitext(os.path.basename(cfg.firmware_file))[0]
+    name = os.path.splitext(os.path.basename(firmware_file))[0]
     if int(name[7:9]) >= 13:
         tb_indices = {
             1: [1,1,1,3], 2: [1,0,1,2], 3: [0,1,1,1], 4: [0,0,1,0]}
