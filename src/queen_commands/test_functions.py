@@ -137,7 +137,7 @@ def adriansNoiseTest():
 
     try: 
 
-        print("   Setting NCLO... ", end="", flush=True)
+        print(f"   Setting NCLO (={nclo})... ", end="", flush=True)
         sendCom("setNCLO", nclo)
         print("Done.")
 
@@ -149,7 +149,7 @@ def adriansNoiseTest():
         print("   Looping over fine NCLOs...")
         for fnclo in fnclos:
         
-            print("   Setting fine NCLO... ", end="", flush=True)
+            print(f"   Setting fine NCLO (={fnclo})... ", end="", flush=True)
             sendCom("setFineNCLO", fnclo)
             print("Done.")
 
