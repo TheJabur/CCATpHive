@@ -146,18 +146,18 @@ def adriansNoiseTest():
         print("Done.")
 
         print("   Looping over fine NCLOs...")
-            for fnclo in fnclos:
-            
-                print("   Setting fine NCLO... ", end="", flush=True)
-                sendCom("setFineNCLO", fnclo)
-                print("Done.")
+        for fnclo in fnclos:
+        
+            print("   Setting fine NCLO... ", end="", flush=True)
+            sendCom("setFineNCLO", fnclo)
+            print("Done.")
 
-                time.sleep(1) # dont catch blip
+            time.sleep(1) # dont catch blip
 
-                # capture timestream
-                print("   Capturing timestream...", end="", flush=True)
-                capTOD(t_tod, fnclo)
-                print("Done.")
+            # capture timestream
+            print("   Capturing timestream...", end="", flush=True)
+            capTOD(t_tod, fnclo)
+            print("Done.")
 
         print("Well Done! :)")
 
