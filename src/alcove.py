@@ -45,6 +45,7 @@ def _com():
         20:alcove_base.setNCLO,
         21:alcove_base.setFineNCLO,
         25:alcove_base.getSnapData,
+        26:alcove_base.getADCrms,
         30:tones.writeTestTone,
         31:tones.writeNewVnaComb,
         32:tones.writeTargCombFromVnaSweep,
