@@ -115,7 +115,8 @@ def adriansNoiseTest():
     nclo = 500
     t_tod = 10
 
-    fnclos = np.logspace(-4, 0, 10)
+    fnclos = np.concatenate((-np.logspace(-4, 0, 10)[::-1], 
+                             np.logspace(-4, 0, 10)))
 
     def sendCom(com_str, args_str=None):
         com_num = alcove.comNumFromStr(com_str)
