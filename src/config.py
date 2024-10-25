@@ -28,12 +28,14 @@ sys.path.insert(1, dir_root)
 
 try:
     from cfg import _cfg_queen as queen
+    queen.dir_root = dir_root
 except ImportError:
     print("Error: _cfg_queen.py is missing from cfg/ directory.")
     raise
 
 try:
     from cfg import _cfg_board as board
+    board.dir_root = dir_root
 except ImportError:
     print("Error: _cfg_board.py is missing from cfg/ directory.")
     raise
