@@ -142,7 +142,7 @@ def adriansNoiseTest():
 
         
         print("   Performing target sweep... ", end="", flush=True)
-        sendCom("sweeps.targetSweep")
+        sendCom("targetSweep")
         print("Done.")
 
         print("   Looping over fine NCLOs...")
