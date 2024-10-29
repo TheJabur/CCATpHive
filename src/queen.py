@@ -53,6 +53,7 @@ def _com():
         6:getClientListLight,
         10:test.tonePowerTest,
         11:test.adriansNoiseTest,
+        12:test.targetSweepPowerTest,
     }
 
 
