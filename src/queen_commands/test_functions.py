@@ -39,6 +39,47 @@ def captureTimestream(packets, ip, port=4096):
 
 
 # ============================================================================ #
+# targetSweepPowerTest 
+def targetSweepPowerTest():
+    """Run a number of varied tone power sweeps and record output.
+
+    Queen listen mode must be running to intercept all the files.
+    """
+
+    bid = 1
+    drid = 1
+    nclo = 600
+
+    def sendCom(com_str, args_str=None):
+        com_num = alcove.comNumFromStr(com_str)
+        return queen.alcoveCommand(
+            com_num, bid=bid, drid=drid, all_boards=False, args=args_str)
+
+    print("setting NCLO")
+    sendCom("setNCLO", nclo)
+    print("done setting NCLO")
+
+    N_sweeps = 10
+    factor = 10**(-1/(2*N_sweeps))
+
+    print("   Performing initial target sweep... ", end="", flush=True)
+    sendCom("targetSweep")
+    print("Done. ", end="", flush=True)
+
+    for i in range(N_sweeps):
+        print(i)
+        print("   Modify comb amplitudes... ", end="", flush=True)
+        sendCom("modifyCustomCombAmps",factor)
+        print("  Done. ", end="", flush=True)
+        print("   Write new custom comb ... ", end="", flush=True)
+        sendCom("writeCombFromCustomList")
+        print("  Done. ", end="", flush=True)
+        print("   Performing target sweep... ", end="", flush=True)
+        sendCom("targetSweep")
+        print("Done. ", end="", flush=True)
+
+
+# ============================================================================ #
 # tonePowerTest
 def tonePowerTest():
     """Run a number of varied tone power sweeps and record output.
@@ -115,8 +156,9 @@ def adriansNoiseTest():
     nclo = 500
     t_tod = 10
 
-    fnclos = np.concatenate((-np.logspace(-4, -1, 50)[::-1], 
-                             np.logspace(-4, -1, 50)))
+    # fnclos = np.concatenate((-np.logspace(-4, -1, 50)[::-1], 
+    #                          np.logspace(-4, -1, 50)))
+    fnclos = np.linspace(-0.02, 0.02, 100)
 
     def sendCom(com_str, args_str=None):
         com_num = alcove.comNumFromStr(com_str)
