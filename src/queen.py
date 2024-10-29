@@ -50,6 +50,7 @@ def _com():
         3:getKeyValue,
         4:setKeyValue,
         5:getClientList,
+        6:getClientListLight,
         10:test.tonePowerTest,
         11:test.adriansNoiseTest,
     }
@@ -185,7 +186,7 @@ def callCom(com_num, args=None):
         ret = message
 
     # supressing this as some commands are called on timer
-    # if ret is not None:              # default success return is None
+    # if ret is not None: # default success return is None
         # print(f"{com[com_num].__name__}: {ret}") # monkeypatched to log
 
     return ret
@@ -275,6 +276,26 @@ def getClientList(do_print=True):
     return client_list
 
 
+# ============================================================================ #
+#  getClientList
+def getClientListLight():
+    """Print the Redis client list.
+    """
+
+    r,p = _connectRedis()
+
+    client_list = r.client_list()
+
+    props = ['id', 'addr', 'name', 'age']
+    client_list_light = {
+        prop: client.get(prop, 'N/A') 
+        for client in client_list 
+        for prop in props
+    }
+
+    return client_list_light
+
+
 
 # ============================================================================ #
 # INTERNAL FUNCTIONS
@@ -285,7 +306,7 @@ def getClientList(do_print=True):
 #  print monkeypatch
 _print = print 
 def print(*args, **kw):
-    # _print(*args, **kw)            # print to terminal
+    # _print(*args, **kw) # print to terminal
     logging.info(' '.join(args))   # log to file
 
 
