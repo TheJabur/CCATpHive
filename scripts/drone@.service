@@ -1,0 +1,13 @@
+[Unit]
+Description=Drone instance %i
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/xilinx/primecam_readout/scripts
+ExecStart=/home/xilinx/primecam_readout/scripts/start_drone.sh %i
+Restart=always
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
