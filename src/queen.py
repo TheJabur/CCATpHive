@@ -287,7 +287,7 @@ def getClientListLight():
 
     client_list = r.client_list()
 
-    props = ['addr', 'name', 'age']
+    props = ['name', 'addr', 'age']
     client_list_light = {}
     for client in client_list:
         client_list_light[client['id']] = {
