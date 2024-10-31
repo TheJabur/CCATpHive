@@ -31,7 +31,7 @@ class file:
             return {
                 'fname'         :'IQ_generic',
                 'file_type'     :'npy', 
-                'dname'         :cfg.root_dir+'/tmp',
+                'dname'         :cfg.src_dir+'/tmp',
                 'use_timestamp' :True}
     IQ_generic = _IQ_generic()
 
@@ -233,7 +233,7 @@ class file:
             return {
                 'fname'         :'sys_info',
                 'file_type'     :'npy', 
-                'dname'         :cfg.root_dir+'/tmp',
+                'dname'         :cfg.src_dir+'/tmp',
                 'use_timestamp' :True}
     sys_info = _sys_info()
 
@@ -242,6 +242,6 @@ class file:
             return {
                 'fname'         :'sys_info_v',
                 'file_type'     :'npy', 
-                'dname'         :cfg.root_dir+'/tmp',
+                'dname'         :cfg.src_dir+'/tmp',
                 'use_timestamp' :True}
     sys_info_v = _sys_info_v()
