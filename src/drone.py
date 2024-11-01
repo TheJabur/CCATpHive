@@ -98,7 +98,7 @@ def modifyConfig(args):
     '''modify config level variables'''
 
     ## project root directory (src)
-    cfg.root_dir = os.getcwd()          # assuming this file lives in root dir
+    cfg.src_dir = os.getcwd()          # assuming this file lives in root dir
 
     ## parent directory
     par_dir = os.path.realpath(os.path.pardir)

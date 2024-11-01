@@ -68,7 +68,7 @@ target_chan_bw = 0.2 # target sweep channel bandwidth [MHz]
 # ============================================================================ #
 # DO NOT MODIFY BELOW
 # ============================================================================ #
-root_dir = ''
+src_dir = ''
 drone_dir = ''
 drid = 0
 board_ip = '0.0.0.0'
