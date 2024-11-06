@@ -77,26 +77,26 @@ def _sshExe(ip, command):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    try:
-        # connect to board
-        client.connect(hostname=ip, 
-                       username=cfg.ssh_user, password=cfg.ssh_pass)
+    # try:
+    # connect to board
+    client.connect(hostname=ip, 
+                    username=cfg.ssh_user, password=cfg.ssh_pass)
 
-        # Execute the command
-        stdin, stdout, stderr = client.exec_command(command)
-        
-        # Capture command output and errors
-        output = stdout.read().decode()
-        errors = stderr.read().decode()
+    # Execute the command
+    stdin, stdout, stderr = client.exec_command(command)
+    
+    # Capture command output and errors
+    output = stdout.read().decode()
+    errors = stderr.read().decode()
 
-        # Print or log output/errors as needed
-        # if output:
-        #     print(f"Output from {ip}:\n{output}")
-        if errors:
-            print(f"Errors from {ip}:\n{errors}")
+    # Print or log output/errors as needed
+    # if output:
+    #     print(f"Output from {ip}:\n{output}")
+    if errors:
+        print(f"Errors from {ip}:\n{errors}")
 
-    except Exception as e:
-        print(f"An error occurred with {ip}: {e}")
+    # except Exception as e:
+    #     print(f"An error occurred with {ip}: {e}")
     
     # finally:
     #     # Close the connection
