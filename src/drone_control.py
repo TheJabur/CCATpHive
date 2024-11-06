@@ -188,6 +188,7 @@ def stopDrone(bid, drid, drone_list=None):
     # stop the drone
     print(f"Stopping drone {bid}.{drid}... ", end="", flush=True)
     command = f"sudo systemctl stop drone@{drid}.service"
+    print(command)
     ret = _sshExe(drone_props['ip'], command)
     print("Done.")
 
