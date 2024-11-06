@@ -58,7 +58,7 @@ def _droneListAndProps(bid, drid, drone_list=None):
 
 # ============================================================================ #
 # _droneRunning
-def _droneRunning(id):
+def _droneRunning(bid, drid):
     # TODO: check if the drone is running... client list?
     return True
 
