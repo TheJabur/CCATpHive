@@ -91,12 +91,17 @@ def _setupArgparse():
         type=str, help="Arguments to send with command, e.g. 'bar' or '-foo bar' or 'baz -foo bar'."\
         " Note: Avoid subargs starting with '-a' or '-q' due to known bug.")
 
-    # bid or -q or neither, but not both
-    g1 = parser.add_mutually_exclusive_group(required=False)
-    g1.add_argument("bid", nargs='?',
+    parser.add_argument("bid", nargs='?',
         type=str, help="Board and drone id: format is 'bid' or 'bid.drid'.")
-    g1.add_argument("-q", "--queen",
+    parser.add_argument("-q", "--queen",
         action="store_true", help="Queen command instead of board command.")
+
+    # bid or -q or neither, but not both
+    # g1 = parser.add_mutually_exclusive_group(required=False)
+    # g1.add_argument("bid", nargs='?',
+    #     type=str, help="Board and drone id: format is 'bid' or 'bid.drid'.")
+    # g1.add_argument("-q", "--queen",
+    #     action="store_true", help="Queen command instead of board command.")
 
     # return arguments values
     return parser.parse_args()
