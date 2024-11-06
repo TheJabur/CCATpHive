@@ -287,7 +287,7 @@ def _setNCLO(chan, lofreq):
     name = os.path.splitext(os.path.basename(cfg.firmware_file))[0]
     if int(name[7:9]) >= 13:
         tb_indices = {
-            1: [1,1,1,3], 2: [1,0,1,2], 3: [0,1,1,1], 4: [0,0,1,0]}
+            1: [1,0,1,3], 2: [1,1,1,2], 3: [0,1,1,0], 4: [0,0,1,1]}
     else:
         tb_indices = {
             1: [0,0,1,3], 2: [0,1,1,2], 3: [1,0,1,1], 4: [1,1,1,0]}
