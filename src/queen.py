@@ -26,6 +26,7 @@ from config import parentDir
 import queen_commands.control_io as io
 import redis_channels as rc
 import queen_commands.test_functions as test
+import drone_control as drone_control
 
 
 
@@ -51,6 +52,7 @@ def _com():
         4:setKeyValue,
         5:getClientList,
         6:getClientListLight,
+        7:drone_control.action,
         10:test.tonePowerTest,
         11:test.adriansNoiseTest,
         12:test.targetSweepPowerTest,
@@ -160,8 +162,8 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
 
 # ============================================================================ #
 #  callCom
-def callCom(com_num, args=None):
-    '''execute a queen command function by key
+def callCom(com_num, args=None, bid=None, drid=None):
+    '''Execute a queen command function by key.
 
     com_num: (int) command number (see queen commands list).
     args: (str) arguments for command (see payloadToCom).
@@ -180,6 +182,8 @@ def callCom(com_num, args=None):
         
     try:
         com_num, args, kwargs = payloadToCom(payload) # split payload into command
+        for k,v in {'bid':bid, 'drid':drid}.items(): # add bid drid to kwargs
+            if v: kwargs[k] = v
         ret = com[com_num](*args, **kwargs)
     except BaseException as e: 
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"

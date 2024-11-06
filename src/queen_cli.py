@@ -103,14 +103,66 @@ def _setupArgparse():
 
 
 # ============================================================================ #
+# _bid_drid
+def _bid_drid(id):
+    '''Separate id into bid.drid.
+    Returns int (bid, drid), (bid, None), or (None, None).
+
+    id: (str) in format 'bid.drid' or 'bid'.
+    '''
+
+    import re
+
+    # casting from Redis strings
+    id  = str(id)
+    
+    if re.fullmatch(r'\d+(\.\d+)?', id): # enforce 'x.y' or 'x'
+
+        parts = id.split('.')
+        bid = int(parts[0])
+        drid = int(parts[1]) if len(parts) > 1 else None
+        
+    else: # incorrect format
+        bid, drid = None, None
+
+    return bid, drid
+
+
+# ============================================================================ #
 # _processCommand
 def _processCommand(args):
-    """
-    Process a single command.
+    """Process a single command.
     Can be for a single bid.drid, all bid.drid, or queen.
     Look at _setupArgparse() for arguments setup.
     """
 
+    bid, drid = _bid_drid(args.bid) if args.bid else (None, None)
+
+    # queen command
+    if args.queen:
+        print(f"Queen command {args.com_num}... ", flush=True)
+        ret = queen.callCom(
+            args.com_num, args=args.arguments, bid=bid, drid=drid)
+
+    # specific board/drone command
+    elif args.bid:
+        print(f"Sending board {args.bid} command {args.com_num}... ", flush=True)
+        if drid:
+            ret = queen.alcoveCommand(
+                args.com_num, bid=bid, drid=drid, args=args.arguments)
+        else:
+            ret = queen.alcoveCommand(
+                args.com_num, bid=bid, args=args.arguments)
+
+    # all-boards commands
+    else:
+        print(f"Processing all boards command {args.com_num}... ", flush=True)
+        ret = queen.alcoveCommand(
+            args.com_num, all_boards=True, args=args.arguments)
+        
+    print(f"Done. {ret=}")
+
+'''
     # queen command
     if args.queen:
         print(f"Queen command {args.com_num}... ", flush=True)
@@ -136,6 +188,7 @@ def _processCommand(args):
             args.com_num, all_boards=True, args=args.arguments)
         
     print(f"Done. {ret=}")
+'''
 
 
 
