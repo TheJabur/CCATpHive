@@ -98,9 +98,9 @@ def _sshExe(ip, command):
     except Exception as e:
         print(f"An error occurred with {ip}: {e}")
     
-    finally:
-        # Close the connection
-        client.close()
+    # finally:
+    #     # Close the connection
+    client.close()
 
 
 
@@ -144,7 +144,7 @@ def action(action, bid=None, drid=None, drone_list=None):
 
 # ============================================================================ #
 # startDrone
-def startDrone(bid, drid, drone_list=None):
+def startDrone(bid, drid, drone_list=None, check=False):
     '''Start the drone at bid.drid.
     '''
 
@@ -156,7 +156,7 @@ def startDrone(bid, drid, drone_list=None):
         return
 
     # check if drone is already obviously running
-    if _droneRunning(bid, drid):
+    if check and _droneRunning(bid, drid):
         print(f"Drone {bid}.{drid} is already running.")
         return
     
@@ -171,7 +171,7 @@ def startDrone(bid, drid, drone_list=None):
 
 # ============================================================================ #
 # stopDrone
-def stopDrone(bid, drid, drone_list=None):
+def stopDrone(bid, drid, drone_list=None, check=False):
     '''Stop the drone bid.drid.
     '''
 
@@ -183,7 +183,7 @@ def stopDrone(bid, drid, drone_list=None):
         return
 
     # check if drone is obviously running
-    if not _droneRunning(bid, drid):
+    if check and not _droneRunning(bid, drid):
         print(f"Drone {bid}.{drid} is not running.")
         return
     
