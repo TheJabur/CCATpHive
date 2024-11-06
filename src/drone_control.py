@@ -12,8 +12,8 @@
 # ============================================================================ #
 
 # import os
-import logging
-logging.getLogger("paramiko").setLevel(logging.CRITICAL)
+# import logging
+# logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 
 from config import queen as cfg
 import queen_commands.control_io as io
