@@ -170,9 +170,28 @@ def startDrone(bid, drid, drone_list=None):
 # ============================================================================ #
 # stopDrone
 def stopDrone(bid, drid, drone_list=None):
-    # TODO:
-    # what does the service do if its not running?
-    pass
+    '''Stop the drone bid.drid.
+    '''
+
+    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+    
+    # check for drone in master list
+    if drone_props is None:
+        print(f"Drone {bid}.{drid} not in master drone list.")
+        return
+
+    # check if drone is obviously running
+    if not _droneRunning(bid, drid):
+        print(f"Drone {bid}.{drid} is not running.")
+        return
+    
+    # stop the drone
+    print(f"Stopping drone {bid}.{drid}... ", end="", flush=True)
+    command = f"sudo systemctl stop drone@{drid}.service"
+    ret = _sshExe(drone_props['ip'], command)
+    print("Done.")
+
+    return ret
 
 
 # ============================================================================ #
