@@ -56,7 +56,7 @@ def _com():
         10:test.tonePowerTest,
         11:test.adriansNoiseTest,
         12:test.targetSweepPowerTest,
-        13:test.targetSweepAndNoiseSweep,
+        # 13:test.targetSweepAndNoiseSweep,
     }
 
 
