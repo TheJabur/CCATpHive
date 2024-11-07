@@ -337,6 +337,7 @@ def statusDrone(bid, drid, drone_list=None):
     # drone is running
     client_list = _clientList()
     print(client_list)
+    
     is_running = f"drone_{id}" in client_list
 
     # status message
