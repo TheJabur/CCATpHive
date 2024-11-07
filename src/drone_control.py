@@ -1,6 +1,6 @@
 # ============================================================================ #
 # drone_control.py
-# Queen drone control script (start/stop/restart).
+# Queen drone control script.
 # James Burgoyne jburgoyne@phas.ubc.ca 
 # CCAT Prime 2024 
 # ============================================================================ #
