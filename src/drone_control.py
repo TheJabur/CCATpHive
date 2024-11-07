@@ -336,10 +336,10 @@ def statusDrone(bid, drid, drone_list=None):
 
     # drone is running
     client_list = _clientList()
-    is_running = id in client_list
+    is_running = f"drone_{id}" in client_list
 
     # status message
-    msg = f"Drone {id}: ip={ip}, to_run={to_run}, running={is_running}"
+    msg = f"Status: Drone {id}: ip={ip}, to_run={to_run}, running={is_running}"
     
     print(msg)
     # return msg
