@@ -150,7 +150,8 @@ def action(action, bid=None, drid=None, drone_list=None):
     '''Convenience function to commands.
     '''
 
-    if action not in ['start', 'stop', 'restart', 'status', 'startAllDrones']:
+    if action not in ['start', 'stop', 'restart', 'status', 
+                      'startAllDrones', 'stopAllDrones', 'restartAllDrones']:
         return None
 
     if action == 'start':
@@ -167,6 +168,12 @@ def action(action, bid=None, drid=None, drone_list=None):
 
     if action == 'startAllDrones':
         return startAllDrones()
+
+    if action == 'stopAllDrones':
+        return stopAllDrones()
+
+    if action == 'restartAllDrones':
+        return restartAllDrones()
 
 
 # ============================================================================ #
@@ -273,15 +280,40 @@ def startAllDrones():
         bid, drid = _bid_drid(id)
 
         # start drone
-        startDrone(bid=bid, drid=drid, drone_list=drone_list)
-            
+        startDrone(bid=bid, drid=drid, drone_list=drone_list)      
 
 
-# TODO:
+# ============================================================================ #
+# stopAllDrones
 def stopAllDrones():
-    pass
+    '''Stop all drones in master drone list (if running).
+    '''
+    
+    # load the master drone list
+    drone_list = _droneList()
+
+    # iterate through row by row
+    for id, props in drone_list.items():
+
+        bid, drid = _bid_drid(id)
+
+        # stop drone
+        stopDrone(bid=bid, drid=drid, drone_list=drone_list)
 
 
-# TODO:
+# ============================================================================ #
+# restartAllDrones
 def restartAllDrones():
-    pass
+    '''Restart all drones in master drone list.
+    '''
+    
+    # load the master drone list
+    drone_list = _droneList()
+
+    # iterate through row by row
+    for id, props in drone_list.items():
+
+        bid, drid = _bid_drid(id)
+
+        # stop drone
+        restartDrone(bid=bid, drid=drid, drone_list=drone_list)
