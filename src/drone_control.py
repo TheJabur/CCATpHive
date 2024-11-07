@@ -11,10 +11,6 @@
 # IMPORTS & GLOBALS
 # ============================================================================ #
 
-# import os
-# import logging
-# logging.getLogger("paramiko").setLevel(logging.CRITICAL)
-
 from config import queen as cfg
 import queen_commands.control_io as io
 
@@ -23,6 +19,32 @@ import queen_commands.control_io as io
 # ============================================================================ #
 # INTERNAL FUNCTIONS
 # ============================================================================ #
+
+
+# ============================================================================ #
+# _bid_drid
+def _bid_drid(id):
+    '''Separate id into bid.drid.
+    Returns int (bid, drid), (bid, None), or (None, None).
+
+    id: (str) in format 'bid.drid' or 'bid'.
+    '''
+
+    import re
+
+    # casting from Redis strings
+    id  = str(id)
+    
+    if re.fullmatch(r'\d+(\.\d+)?', id): # enforce 'x.y' or 'x'
+
+        parts = id.split('.')
+        bid = int(parts[0])
+        drid = int(parts[1]) if len(parts) > 1 else None
+        
+    else: # incorrect format
+        bid, drid = None, None
+
+    return bid, drid
 
 
 # ============================================================================ #
@@ -47,12 +69,13 @@ def _droneListAndProps(bid, drid, drone_list=None):
     '''Get master drone list and properties for given drone id.
     '''   
 
+    id = f"{bid}.{drid}"
+
     # get master drone list unless it was passed in
     if drone_list is None:
         drone_list = _droneList()
 
     # get drone properties from list
-    id = f"{bid}.{drid}"
     drone_props = drone_list.get(id)
 
     return drone_list, drone_props
@@ -146,7 +169,7 @@ def action(action, bid=None, drid=None, drone_list=None):
 # ============================================================================ #
 # startDrone
 def startDrone(bid, drid, drone_list=None, check=False):
-    '''Start the drone at bid.drid.
+    '''Start the drone at bid.drid if not running.
     '''
 
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
@@ -173,7 +196,7 @@ def startDrone(bid, drid, drone_list=None, check=False):
 # ============================================================================ #
 # stopDrone
 def stopDrone(bid, drid, drone_list=None, check=False):
-    '''Stop the drone bid.drid.
+    '''Stop the drone bid.drid if running.
     '''
 
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
@@ -200,30 +223,55 @@ def stopDrone(bid, drid, drone_list=None, check=False):
 # ============================================================================ #
 # restartDrone
 def restartDrone(bid, drid, drone_list=None):
-    # TODO:
-    # what does the service do if its not running?
-    # presumably want to start if not running
-    # is this command even necessary?
-    pass
+    '''Restart the drone bid.drid, whether running or not.
+    '''
+
+    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+    
+    # check for drone in master list
+    if drone_props is None:
+        print(f"Drone {bid}.{drid} not in master drone list.")
+        return
+    
+    # stop the drone
+    print(f"Restarting drone {bid}.{drid}... ", end="", flush=True)
+    command = f"sudo systemctl restart drone@{drid}.service"
+    ret = _sshExe(drone_props['ip'], command)
+    print("Done.")
+
+    return ret
 
 
 # ============================================================================ #
 # statusDrone
 def statusDrone(bid, drid, drone_list=None):
     # TODO:
-    # just client list status, or serviced status?
-    # how would it get serviced status?
+    # redis client list status
+    
     pass
 
 
-# TODO:
-# 'All' in this context needs to be clear that it means from master drone list file
+# ============================================================================ #
+# startAllDrones
 def startAllDrones():
-    # parse master drone list file
-    # and start all the drones in it
-    # what if they are already running?
-        # push problem to startDrone?
-    pass
+    '''Start all drones in master drone list (if to_run=True).
+    '''
+    
+    # load the master drone list
+    drone_list = _droneList()
+
+    # iterate through row by row
+    for id, props in drone_list.items():
+
+        # skip this drone if it's not supposed to be running
+        if props.get('to_run') != True:
+            continue
+
+        bid, drid = _bid_drid(id)
+
+        # start drone
+        startDrone(bid=bid, drid=drid, drone_list=drone_list)
+            
 
 
 # TODO:
