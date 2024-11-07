@@ -148,7 +148,10 @@ def _droneRunning(bid, drid):
 
     client_list = _clientList()
 
-    return id in client_list
+    running = any(entry.get('name') == f"drone_{id}" 
+                  for entry in client_list.values())
+
+    return running
 
 
 # ============================================================================ #
@@ -335,13 +338,10 @@ def statusDrone(bid, drid, drone_list=None):
     to_run = drone_props.get('to_run')
 
     # drone is running
-    client_list = _clientList()
-    print(client_list)
-    
-    is_running = f"drone_{id}" in client_list
+    running = _droneRunning(bid, drid)
 
     # status message
-    msg = f"Status: Drone {id}: ip={ip}, to_run={to_run}, running={is_running}"
+    msg = f"Status: Drone {id}: ip={ip}, to_run={to_run}, running={running}"
     
     print(msg)
     # return msg
