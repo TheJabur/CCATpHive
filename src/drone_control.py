@@ -150,7 +150,7 @@ def action(action, bid=None, drid=None, drone_list=None):
     '''Convenience function to commands.
     '''
 
-    if action not in ['start', 'stop', 'restart', 'status']:
+    if action not in ['start', 'stop', 'restart', 'status', 'startAllDrones']:
         return None
 
     if action == 'start':
@@ -164,6 +164,9 @@ def action(action, bid=None, drid=None, drone_list=None):
 
     if action == 'status':
         return statusDrone(bid, drid, drone_list)
+
+    if action == 'startAllDrones':
+        return startAllDrones()
 
 
 # ============================================================================ #
