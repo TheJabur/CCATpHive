@@ -1,6 +1,6 @@
 # ============================================================================ #
 # drone_control.py
-# Queen drone control script (start/stop/restart).
+# Queen drone control script.
 # James Burgoyne jburgoyne@phas.ubc.ca 
 # CCAT Prime 2024 
 # ============================================================================ #
@@ -10,6 +10,8 @@
 # ============================================================================ #
 # IMPORTS & GLOBALS
 # ============================================================================ #
+
+import redis
 
 from config import queen as cfg
 import queen_commands.control_io as io
@@ -47,6 +49,20 @@ def _bid_drid(id):
     return bid, drid
 
 
+def _id(bid, drid=None):
+    '''Join bid.drid into id.
+    '''
+
+    id = f"{bid}.{drid}"
+
+    # check for consistency
+    bidc, dridc = _bid_drid(id)
+    if bidc != bid or dridc != drid:
+        id = None
+
+    return id
+
+
 # ============================================================================ #
 # _droneList
 def _droneList():
@@ -69,7 +85,7 @@ def _droneListAndProps(bid, drid, drone_list=None):
     '''Get master drone list and properties for given drone id.
     '''   
 
-    id = f"{bid}.{drid}"
+    id = _id(bid, drid)
 
     # get master drone list unless it was passed in
     if drone_list is None:
@@ -82,10 +98,60 @@ def _droneListAndProps(bid, drid, drone_list=None):
 
 
 # ============================================================================ #
+#  _connectRedis
+def _connectRedis():
+    '''Connect to the redis server.
+    '''
+
+    r = redis.Redis(host=cfg.host, port=cfg.port, db=cfg.db, password=cfg.pw)
+    p = r.pubsub()
+
+    r.client_setname(f'drone_control')
+
+    # check for connection
+    try:
+        r.ping()
+    except redis.exceptions.ConnectionError as e:
+        print(f"Redis connection error: {e}")
+
+    return r, p
+
+
+# ============================================================================ #
+#  _clientList
+def _clientList():
+    """The Redis client list.
+    """
+
+    r,p = _connectRedis()
+
+    client_list = r.client_list()
+
+    props = ['name', 'addr', 'age']
+    client_list_light = {}
+    for client in client_list:
+        client_list_light[client['id']] = {
+            prop: client.get(prop, 'N/A')
+            for prop in props
+        }
+
+    return client_list_light
+
+
+# ============================================================================ #
 # _droneRunning
 def _droneRunning(bid, drid):
-    # TODO: check if the drone is running... client list?
-    return False
+    '''Check if drone is running by checking if it's in Redis client list.
+    '''
+
+    id = _id(bid, drid)
+
+    client_list = _clientList()
+
+    running = any(entry.get('name') == f"drone_{id}" 
+                  for entry in client_list.values())
+
+    return running
 
 
 # ============================================================================ #
@@ -255,10 +321,30 @@ def restartDrone(bid, drid, drone_list=None):
 # ============================================================================ #
 # statusDrone
 def statusDrone(bid, drid, drone_list=None):
-    # TODO:
-    # redis client list status
+    '''
+    '''
+
+    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
     
-    pass
+    # check for drone in master list
+    if drone_props is None:
+        print(f"Drone {bid}.{drid} not in master drone list.")
+        return
+
+    id = _id(bid, drid)
+
+    # basic drone master list properties
+    ip = drone_props.get('ip')
+    to_run = drone_props.get('to_run')
+
+    # drone is running
+    running = _droneRunning(bid, drid)
+
+    # status message
+    msg = f"Status: Drone {id}: ip={ip}, to_run={to_run}, running={running}"
+    
+    print(msg)
+    # return msg
 
 
 # ============================================================================ #
