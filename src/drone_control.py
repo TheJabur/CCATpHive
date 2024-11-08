@@ -253,7 +253,7 @@ def _addOvRide(bid, drid, timeout=60*60*12):
     override_list = _loadOvRide()
 
     # remove existing entry for this drone
-    override_list.pop(id)
+    override_list.pop(id, None)
 
     # calculate timeout time
     current_time = datetime.now()
