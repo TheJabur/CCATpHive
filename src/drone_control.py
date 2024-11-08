@@ -278,7 +278,7 @@ def _remOvRide(bid, drid):
     override_list = _loadOvRide()
 
     # remove existing entry for this drone
-    override_list.pop(id)
+    override_list.pop(id, None)
 
     _saveOvRide(override_list)
 
