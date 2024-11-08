@@ -208,10 +208,12 @@ def _loadOvRide():
     '''Load the master drone list override file into dict.
     '''
 
-    import yaml
+    import yaml, os
     
-    with open(_fnameOvRide(), "r") as file:
-        override_list = yaml.safe_load(file)
+    override_list = {}
+    if os.path.exists(_fnameOvRide()):
+        with open(_fnameOvRide(), "r") as file:
+            override_list = yaml.safe_load(file)
 
     return override_list
 
@@ -261,6 +263,8 @@ def _addOvRide(bid, drid, timeout=60*60*12):
     override_list[id] = timeout_time.isoformat()
 
     _saveOvRide(override_list)
+
+    return timeout
 
 
 # ============================================================================ #
@@ -373,9 +377,9 @@ def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
 
     # add an override so monitor doesn't restart (until timeout)
     if timeout:
-        _addOvRide(bid, drid, timeout=timeout)
+        timeout = _addOvRide(bid, drid, timeout=timeout)
     else:
-        _addOvRide(bid, drid)
+        timeout = _addOvRide(bid, drid)
 
     # check if drone is obviously running
     if check and not _droneRunning(bid, drid):
@@ -383,7 +387,7 @@ def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
         return
     
     # stop the drone
-    print(f"Stopping drone {bid}.{drid}... ", end="", flush=True)
+    print(f"Stopping drone {bid}.{drid} (for {timeout} s)... ", end="", flush=True)
     command = f"sudo systemctl stop drone@{drid}.service"
     ret = _sshExe(drone_props['ip'], command)
     print("Done.")
