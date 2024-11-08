@@ -193,6 +193,92 @@ def _sshExe(ip, command):
     client.close()
 
 
+# ============================================================================ #
+# _fnameOvRide
+def _fnameOvRide():
+    '''Master drone list override file name.
+    '''
+
+    return 'override_drone_list.yaml'
+
+
+# ============================================================================ #
+# _loadOvRide
+def _loadOvRide():
+    '''Load the master drone list override file into dict.
+    '''
+
+    import yaml
+    
+    with open(_fnameOvRide(), "r") as file:
+        override_list = yaml.safe_load(file)
+
+    return override_list
+
+
+# ============================================================================ #
+# _saveOvRide
+def _saveOvRide(override_list):
+    '''Save given dict to master drone file override file.
+    '''
+
+    import yaml
+    from datetime import datetime
+    
+    # remove expired entries
+    current_time = datetime.now()
+    for id in list(override_list.keys()): # editing in place
+        if datetime.fromisoformat(override_list[id]) <= current_time:
+            del override_list[id]
+
+    # save to file
+    with open(_fnameOvRide(), 'w') as file:
+        yaml.dump(override_list, file)
+
+
+# ============================================================================ #
+# _addOvRide
+def _addOvRide(bid, drid, timeout=60*60*12):
+    '''Add master drone list to_run override.
+
+    timeout: (int) Duration override is valid, [s].
+    '''
+
+    from datetime import datetime, timedelta
+
+    id = _id(bid, drid)
+
+    override_list = _loadOvRide()
+
+    # remove existing entry for this drone
+    override_list.pop(id)
+
+    # calculate timeout time
+    current_time = datetime.now()
+    timeout_time = current_time + timedelta(seconds=timeout)
+
+    # add timeout time to override list as timestamp
+    override_list[id] = timeout_time.isoformat()
+
+    _saveOvRide(override_list)
+
+
+# ============================================================================ #
+# _remOvRide
+def _remOvRide(bid, drid):
+    '''Remove master drone list to_run override.
+    '''
+
+    id = _id(bid, drid)
+
+    override_list = _loadOvRide()
+
+    # remove existing entry for this drone
+    override_list.pop(id)
+
+    _saveOvRide(override_list)
+
+
 
 
 # ============================================================================ #
@@ -255,6 +341,9 @@ def startDrone(bid, drid, drone_list=None, check=False):
         print(f"Drone {bid}.{drid} not in master drone list.")
         return
 
+    # remove existing override
+    _remOvRide(bid, drid)
+
     # check if drone is already obviously running
     if check and _droneRunning(bid, drid):
         print(f"Drone {bid}.{drid} is already running.")
@@ -271,7 +360,7 @@ def startDrone(bid, drid, drone_list=None, check=False):
 
 # ============================================================================ #
 # stopDrone
-def stopDrone(bid, drid, drone_list=None, check=False):
+def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
     '''Stop the drone bid.drid if running.
     '''
 
@@ -281,6 +370,12 @@ def stopDrone(bid, drid, drone_list=None, check=False):
     if drone_props is None:
         print(f"Drone {bid}.{drid} not in master drone list.")
         return
+
+    # add an override so monitor doesn't restart (until timeout)
+    if timeout:
+        _addOvRide(bid, drid, timeout=timeout)
+    else:
+        _addOvRide(bid, drid)
 
     # check if drone is obviously running
     if check and not _droneRunning(bid, drid):
@@ -309,6 +404,9 @@ def restartDrone(bid, drid, drone_list=None):
         print(f"Drone {bid}.{drid} not in master drone list.")
         return
     
+    # remove existing override
+    _remOvRide(bid, drid)
+
     # stop the drone
     print(f"Restarting drone {bid}.{drid}... ", end="", flush=True)
     command = f"sudo systemctl restart drone@{drid}.service"
