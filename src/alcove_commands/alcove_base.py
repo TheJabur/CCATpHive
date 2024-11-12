@@ -137,6 +137,38 @@ def userPacket(data):
     # Write the data
     udp_control.write(0x08, new_state)
 
+# ============================================================================ #
+# userPacketInfo 
+def userPacketInfo(data):
+    # 16 bit data
+    # current drone channel
+    chan = cfg.drid
+    udp_control = firmware.gpio_udp_info_control
+    we = 2**19
+    info = 0*2**18
+    #count = 1*2**18
+    dronenum = (chan-1)*2**16 # drone number minus 1
+    # setup value , info or count, and drone number
+    udp_control.write(0x08, info + dronenum + value)
+    # strobe write enable
+    udp_control.write(0x08, we + info + dronenum + value)
+    udp_control.write(0x08, info + dronenum + value)
+
+# ============================================================================ #
+# writeChannelCount 
+def writeChannelCount(num_chans):
+    # 16 bit value for number of active tones/channels in packet
+    # current drone channel
+    chan = cfg.drid
+    we = 2**19
+    #info = 0*2**18
+    count = 1*2**18
+    dronenum = (chan-1)*2**16 # drone number minus 1
+    # setup value , info or count, and drone number
+    udp_control.write(0x08, count + dronenum + num_chans)
+    # strobe write enable
+    udp_control.write(0x08, we + count + dronenum + num_chans)
+    udp_control.write(0x08, count + dronenum + num_chans)
 
 # ============================================================================ #
 # generateWaveDdr4
