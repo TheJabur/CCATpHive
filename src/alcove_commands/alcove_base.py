@@ -160,6 +160,7 @@ def writeChannelCount(num_chans):
     # 16 bit value for number of active tones/channels in packet
     # current drone channel
     chan = cfg.drid
+    udp_control = firmware.gpio_udp_info_control
     we = 2**19
     #info = 0*2**18
     count = 1*2**18
