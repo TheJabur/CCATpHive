@@ -214,16 +214,19 @@ def monitorMode():
         # load the master drone list
         drone_list = drone_control._droneList()
 
+        print(drone_list)
         print("2")
 
         # get the current client list
         client_list = drone_control._clientList()
 
+        print(client_list)
         print("3")
 
         # temporary override list
         override_list = drone_control._loadOvRide()
 
+        print(override_list)
         print("4")
 
         # loop over master drone list
