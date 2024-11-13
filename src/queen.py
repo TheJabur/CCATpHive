@@ -244,13 +244,20 @@ def monitorMode():
             print("6")
 
             # check if drone running, start if not
-            try_to_start = drone_control._monitorDrone(
+            status = drone_control._monitorDrone(
                 bid, drid, drone_list, client_list)
             
             print("7")
             
-            if try_to_start:
-                msg = f"monitorMode: Starting drone {id}."
+            if status: # not 0
+                msg = f"monitorMode: "
+                if status == 1:
+                    msg += "Starting "
+                elif status == 2:
+                    msg += "Stopping "
+                else:
+                    msg += "Unknown status: "
+                msg += f"drone {id}."
                 print(msg) # queen logs prints
                 _notificationHandler(msg)
 

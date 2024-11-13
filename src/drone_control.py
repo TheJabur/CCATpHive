@@ -303,28 +303,41 @@ def _hasOvRide(bid, drid, override_list=None):
 # _monitorDrone
 def _monitorDrone(bid, drid, drone_list, client_list):
     '''Used within queen drone monitoring.
-    Returns True if start command is sent, otherwise False.
+    Return: 
+        0: Did nothing
+        1: Start sent
+        2: Stop sent
     '''
 
     print("a")
 
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+    to_run = True if drone_props.get('to_run') else False
 
     print("b")
 
     # check if drone is already running
-    if _droneRunning(bid, drid, client_list):
-        return False
+    is_running = _droneRunning(bid, drid, client_list)
     
     print("c")
 
-    # start the drone
-    command = f"sudo systemctl start drone@{drid}.service"
-    ret = _sshExe(drone_props['ip'], command)
+    status = 0 # default; did nothing
+
+    # shouldn't be running but is: stop
+    if not to_run and is_running:
+        command = f"sudo systemctl stop drone@{drid}.service"
+        ret = _sshExe(drone_props['ip'], command)
+        status = 2
+
+    # should be running but isn't: start
+    elif to_run and not is_running:
+        command = f"sudo systemctl start drone@{drid}.service"
+        ret = _sshExe(drone_props['ip'], command)
+        status = 1
 
     print("d")
 
-    return True
+    return status
 
 
 
