@@ -54,6 +54,7 @@ def _com():
         5:getClientList,
         6:getClientListLight,
         7:drone_control.action,
+        8:monitorMode,
         10:test.tonePowerTest,
         11:test.adriansNoiseTest,
         12:test.targetSweepPowerTest,
