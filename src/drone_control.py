@@ -310,6 +310,7 @@ def _monitorDrone(bid, drid, drone_list, client_list):
     '''
 
     print("a")
+    print(bid, drid, drone_list)
 
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
 
