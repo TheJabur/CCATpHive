@@ -96,6 +96,7 @@ def _droneListAndProps(bid, drid, drone_list=None):
     if drone_list is None:
         drone_list = _droneList()
 
+    print(drone_list)
     print("iii")
 
     # get drone properties from list
