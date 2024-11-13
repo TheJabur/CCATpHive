@@ -312,6 +312,9 @@ def _monitorDrone(bid, drid, drone_list, client_list):
     print("a")
 
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+
+    print("aa")
+
     to_run = True if drone_props.get('to_run') else False
 
     print("b")
