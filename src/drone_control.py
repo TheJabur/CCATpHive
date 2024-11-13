@@ -85,25 +85,14 @@ def _droneListAndProps(bid, drid, drone_list=None):
     '''Get master drone list and properties for given drone id.
     '''   
 
-    print("i")
-
     id = _id(bid, drid)
-
-    print(id)
-    print("ii")
 
     # get master drone list unless it was passed in
     if drone_list is None:
         drone_list = _droneList()
 
-    print(drone_list)
-    print("iii")
-
     # get drone properties from list
     drone_props = drone_list.get(id)
-
-    print(drone_props)
-    print("iv")
 
     return drone_list, drone_props
 
@@ -320,22 +309,12 @@ def _monitorDrone(bid, drid, drone_list, client_list):
         2: Stop sent
     '''
 
-    print("a")
-    print(bid, drid, drone_list)
-
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
-
-    print(drone_props)
-    print("aa")
 
     to_run = True if drone_props.get('to_run') else False
 
-    print("b")
-
     # check if drone is already running
     is_running = _droneRunning(bid, drid, client_list)
-    
-    print("c")
 
     status = 0 # default; did nothing
 
@@ -350,8 +329,6 @@ def _monitorDrone(bid, drid, drone_list, client_list):
         command = f"sudo systemctl start drone@{drid}.service"
         ret = _sshExe(drone_props['ip'], command)
         status = 1
-
-    print("d")
 
     return status
 

@@ -209,45 +209,27 @@ def monitorMode():
     # action taken every monitor loop
     def monitorAction():
 
-        print("1")
-
         # load the master drone list
         drone_list = drone_control._droneList()
-
-        print(drone_list)
-        print("2")
 
         # get the current client list
         client_list = drone_control._clientList()
 
-        print(client_list)
-        print("3")
-
         # temporary override list
         override_list = drone_control._loadOvRide()
-
-        print(override_list)
-        print("4")
 
         # loop over master drone list
         for id in drone_list:
 
             bid, drid = drone_control._bid_drid(id)
 
-            print("bid drid = ", bid, drid)
-            print("5")
-
             # ignore if on override list
             if drone_control._hasOvRide(bid, drid, override_list):
                 continue
 
-            print("6")
-
             # check if drone running, start if not
             status = drone_control._monitorDrone(
                 bid, drid, drone_list, client_list)
-            
-            print("7")
             
             if status: # not 0
                 msg = f"monitorMode: "
@@ -260,8 +242,6 @@ def monitorMode():
                 msg += f"drone {id}."
                 print(msg) # queen logs prints
                 _notificationHandler(msg)
-
-            print("8")
 
     # monitor loop
     print('Starting queen monitor mode.') 
