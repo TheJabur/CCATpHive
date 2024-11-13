@@ -392,7 +392,7 @@ def getClientListLight():
 _print = print 
 def print(*args, **kw):
     _print(*args, **kw) # print to terminal
-    logging.info(' '.join(args))   # log to file
+    # logging.info(' '.join(args))   # log to file
 
 
 # ============================================================================ #
