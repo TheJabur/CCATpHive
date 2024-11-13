@@ -85,14 +85,24 @@ def _droneListAndProps(bid, drid, drone_list=None):
     '''Get master drone list and properties for given drone id.
     '''   
 
+    print("i")
+
     id = _id(bid, drid)
+
+    print(id)
+    print("ii")
 
     # get master drone list unless it was passed in
     if drone_list is None:
         drone_list = _droneList()
 
+    print("iii")
+
     # get drone properties from list
     drone_props = drone_list.get(id)
+
+    print(drone_props)
+    print("iv")
 
     return drone_list, drone_props
 
