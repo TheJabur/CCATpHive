@@ -234,6 +234,7 @@ def monitorMode():
 
             bid, drid = drone_control._bid_drid(id)
 
+            print(bid, drid)
             print("5")
 
             # ignore if on override list
