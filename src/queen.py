@@ -209,35 +209,51 @@ def monitorMode():
     # action taken every monitor loop
     def monitorAction():
 
+        print("1")
+
         # load the master drone list
         drone_list = drone_control._droneList()
+
+        print("2")
 
         # get the current client list
         client_list = drone_control._clientList()
 
+        print("3")
+
         # temporary override list
         override_list = drone_control._loadOvRide()
+
+        print("4")
 
         # loop over master drone list
         for id in drone_list:
 
             bid, drid = drone_control._bid_drid(id)
 
+            print("5")
+
             # ignore if on override list
             if drone_control._hasOvRide(bid, drid, override_list):
                 continue
 
+            print("6")
+
             # check if drone running, start if not
             try_to_start = drone_control._monitorDrone(
                 bid, drid, drone_list, client_list)
+            
+            print("7")
             
             if try_to_start:
                 msg = f"monitorMode: Starting drone {id}."
                 print(msg) # queen logs prints
                 _notificationHandler(msg)
 
+            print("8")
+
     # monitor loop
-    print('Monitoring drones (ctrl-c to stop)...') 
+    print('Starting queen monitor mode.') 
     while True:
         monitorAction()
         time.sleep(cfg.monitor_interval) 
@@ -372,7 +388,7 @@ def getClientListLight():
 #  print monkeypatch
 _print = print 
 def print(*args, **kw):
-    # _print(*args, **kw) # print to terminal
+    _print(*args, **kw) # print to terminal
     logging.info(' '.join(args))   # log to file
 
 
