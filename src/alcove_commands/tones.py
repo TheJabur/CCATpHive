@@ -215,6 +215,8 @@ def _writeComb(chan, freqs, amps, phi):
     # freqs *= freqOffsetFixHackFactor() # Fequency offset fix
      # implemented in tones._writeComb and alcove_base._setNCLO
     wave, dphi, freq_actual = generateWaveDdr4(freqs, amps, phi)
+    # write number of channels to 16 bit value in UDP packet
+    writeChannelCount(len(freqs))
     #wave_real, wave_imag = _normWave(wave, max_amp=2**15-1)
     wave_real, wave_imag = wave.real.astype("int16"), wave.imag.astype("int16") 
     _waveAmpTest(wave, max_amp=2**15-1)
