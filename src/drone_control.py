@@ -306,15 +306,23 @@ def _monitorDrone(bid, drid, drone_list, client_list):
     Returns True if start command is sent, otherwise False.
     '''
 
+    print("a")
+
     drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+
+    print("b")
 
     # check if drone is already running
     if _droneRunning(bid, drid, client_list):
         return False
     
+    print("c")
+
     # start the drone
     command = f"sudo systemctl start drone@{drid}.service"
     ret = _sshExe(drone_props['ip'], command)
+
+    print("d")
 
     return True
 
