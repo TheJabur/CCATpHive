@@ -14,5 +14,6 @@ pw   = None
 ssh_user = 'xilinx'
 ssh_pass = 'xilinx'
 
-## master drone list
+## drone monitoring
 master_drone_list_file = 'master_drone_list.yaml'
+monitor_interval = 10 # s

@@ -19,6 +19,7 @@ import logging
 import pickle
 from datetime import datetime
 # import tempfile
+import time
 
 from config import queen as cfg
 from config import parentDir
@@ -199,6 +200,63 @@ def callCom(com_num, args=None, bid=None, drid=None):
 
 
 # ============================================================================ #
+#  monitorMode
+def monitorMode():
+    """Monitor/keep-alive the drones, as per the master drone list file.
+    """
+
+    # action taken every monitor loop
+    def monitorAction():
+
+        # load the master drone list
+        drone_list = drone_control._droneList()
+
+        # get the current client list
+        client_list = drone_control._clientList()
+
+        # temporary override list
+        override_list = drone_control._loadOvRide()
+
+        # loop over master drone list
+        for id in drone_list:
+
+            bid, drid = drone_control._bid_drid(id)
+
+            # ignore if on override list
+            if drone_control._hasOvRide(bid, drid, override_list):
+                continue
+
+            # check if drone running, start if not
+            try_to_start = drone_control._monitorDrone(
+                bid, drid, drone_list, client_list)
+            
+            if try_to_start:
+                msg = f"monitorMode: Starting drone {id}."
+                print(msg) # queen logs prints
+                _notificationHandler(msg)
+
+    # monitor loop
+    print('Monitoring drones (ctrl-c to stop)...') 
+    while True:
+        monitorAction()
+        time.sleep(cfg.monitor_interval) 
+
+'''
+r,p = _connectRedis() # should this be done every loop or held?
+
+drone_list, drone_props = drone_control._droneListAndProps(
+    bid, drid, drone_list)
+
+drone_control._droneRunning(bid, drid, client_list)
+
+drone_props = drone_list.get(id)
+
+running = any(entry.get('name') == f"drone_{id}" 
+        for entry in client_list.values())
+'''
+
+
+# ============================================================================ #
 #  listenMode
 def listenMode():
     """Listen for Redis messages (threaded).
@@ -370,7 +428,7 @@ def _processCommandReturn(dat):
 def _notificationHandler(message):
     '''process given messages for sending notifications to end-users'''
 
-    print("notificationHandler(): Not implemented yet!")
+    print(f"notificationHandler(): Not implemented yet. Message: {message}")
     # todo
      # look through given message[s?]
      # and look through configured notifications

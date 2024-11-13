@@ -140,13 +140,14 @@ def _clientList():
 
 # ============================================================================ #
 # _droneRunning
-def _droneRunning(bid, drid):
+def _droneRunning(bid, drid, client_list=None):
     '''Check if drone is running by checking if it's in Redis client list.
     '''
 
     id = _id(bid, drid)
 
-    client_list = _clientList()
+    if not client_list:
+        client_list = _clientList()
 
     running = any(entry.get('name') == f"drone_{id}" 
                   for entry in client_list.values())
@@ -209,11 +210,18 @@ def _loadOvRide():
     '''
 
     import yaml, os
+    from datetime import datetime
     
     override_list = {}
     if os.path.exists(_fnameOvRide()):
         with open(_fnameOvRide(), "r") as file:
             override_list = yaml.safe_load(file)
+
+    # remove expired entries
+    current_time = datetime.now()
+    for id in list(override_list.keys()): # editing in place
+        if datetime.fromisoformat(override_list[id]) <= current_time:
+            del override_list[id]
 
     return override_list
 
@@ -226,12 +234,6 @@ def _saveOvRide(override_list):
 
     import yaml
     from datetime import datetime
-    
-    # remove expired entries
-    current_time = datetime.now()
-    for id in list(override_list.keys()): # editing in place
-        if datetime.fromisoformat(override_list[id]) <= current_time:
-            del override_list[id]
 
     # save to file
     with open(_fnameOvRide(), 'w') as file:
@@ -281,6 +283,40 @@ def _remOvRide(bid, drid):
     override_list.pop(id, None)
 
     _saveOvRide(override_list)
+
+
+# ============================================================================ #
+# _hasOvRide
+def _hasOvRide(bid, drid, override_list=None):
+    '''Check if a drone is on the override list (True/False).
+    '''
+    
+    id = _id(bid, drid)
+
+    if not override_list:
+        override_list = _loadOvRide()
+
+    return True if override_list.get(id) else False
+
+
+# ============================================================================ #
+# _monitorDrone
+def _monitorDrone(bid, drid, drone_list, client_list):
+    '''Used within queen drone monitoring.
+    Returns True if start command is sent, otherwise False.
+    '''
+
+    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+
+    # check if drone is already running
+    if _droneRunning(bid, drid, client_list):
+        return False
+    
+    # start the drone
+    command = f"sudo systemctl start drone@{drid}.service"
+    ret = _sshExe(drone_props['ip'], command)
+
+    return True
 
 
 
@@ -454,6 +490,8 @@ def statusDrone(bid, drid, drone_list=None):
 def startAllDrones():
     '''Start all drones in master drone list (if to_run=True).
     '''
+
+    # this could potentially be threaded to run connections in parallel
     
     # load the master drone list
     drone_list = _droneList()
@@ -476,6 +514,8 @@ def startAllDrones():
 def stopAllDrones():
     '''Stop all drones in master drone list (if running).
     '''
+
+    # this could potentially be threaded to run connections in parallel
     
     # load the master drone list
     drone_list = _droneList()
@@ -494,6 +534,8 @@ def stopAllDrones():
 def restartAllDrones():
     '''Restart all drones in master drone list.
     '''
+
+    # this could potentially be threaded to run connections in parallel
     
     # load the master drone list
     drone_list = _droneList()
