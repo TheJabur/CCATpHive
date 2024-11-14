@@ -16,6 +16,9 @@ import redis
 from config import queen as cfg
 import queen_commands.control_io as io
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 
 
 # ============================================================================ #
@@ -169,8 +172,14 @@ def _sshExe(ip, command):
 
     try:
         # connect to board
-        client.connect(hostname=ip, 
-                        username=cfg.ssh_user, password=cfg.ssh_pass)
+        client.connect(
+            hostname=ip,
+            port=22,
+            username=cfg.ssh_user, 
+            password=cfg.ssh_pass,
+            look_for_keys=False, # only use password login
+            allow_agent=False,
+            )
 
         # Execute the command
         stdin, stdout, stderr = client.exec_command(command)
