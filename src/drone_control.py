@@ -17,7 +17,7 @@ from config import queen as cfg
 import queen_commands.control_io as io
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("paramiko").setLevel(logging.ERROR)
 
 
 
