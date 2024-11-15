@@ -206,17 +206,16 @@ def monitorMode():
     """Monitor/keep-alive the drones, as per the master drone list file.
     """
 
+    # hold a Redis connection
+    r,p = _connectRedis() # any problems with holding this for a long time?
+
     # action taken every monitor loop
-    def monitorAction():
+    def monitorAction(r):
 
-        # load the master drone list
-        drone_list = drone_control._droneList()
-
-        # get the current client list
-        client_list = drone_control._clientList()
-
-        # temporary override list
-        override_list = drone_control._loadOvRide()
+        # load needed drone lists
+        drone_list = drone_control._droneList()      # master drone list
+        client_list = drone_control._clientList()    # redis client list
+        override_list = drone_control._loadOvRide()  # tmp override list
 
         # loop over master drone list
         for id in drone_list:
@@ -229,7 +228,7 @@ def monitorMode():
 
             # check if drone running, start if not
             status = drone_control._monitorDrone(
-                bid, drid, drone_list, client_list)
+                bid, drid, drone_list, client_list, r=r)
             
             if status: # not 0
                 msg = f"monitorMode: "
@@ -246,22 +245,8 @@ def monitorMode():
     # monitor loop
     print('Starting queen monitor mode.') 
     while True:
-        monitorAction()
+        monitorAction(r)
         time.sleep(cfg.monitor_interval) 
-
-'''
-r,p = _connectRedis() # should this be done every loop or held?
-
-drone_list, drone_props = drone_control._droneListAndProps(
-    bid, drid, drone_list)
-
-drone_control._droneRunning(bid, drid, client_list)
-
-drone_props = drone_list.get(id)
-
-running = any(entry.get('name') == f"drone_{id}" 
-        for entry in client_list.values())
-'''
 
 
 # ============================================================================ #

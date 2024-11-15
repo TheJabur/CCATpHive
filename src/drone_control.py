@@ -122,11 +122,14 @@ def _connectRedis():
 
 # ============================================================================ #
 #  _clientList
-def _clientList():
+def _clientList(r=None):
     """The Redis client list.
+
+    r,p: Redis initialization variables.
     """
 
-    r,p = _connectRedis()
+    if r is None:
+        r,p = _connectRedis()
 
     client_list = r.client_list()
 
@@ -143,14 +146,14 @@ def _clientList():
 
 # ============================================================================ #
 # _droneRunning
-def _droneRunning(bid, drid, client_list=None):
+def _droneRunning(bid, drid, client_list=None, r=None):
     '''Check if drone is running by checking if it's in Redis client list.
     '''
 
     id = _id(bid, drid)
 
     if not client_list:
-        client_list = _clientList()
+        client_list = _clientList(r)
 
     running = any(entry.get('name') == f"drone_{id}" 
                   for entry in client_list.values())
@@ -310,7 +313,7 @@ def _hasOvRide(bid, drid, override_list=None):
 
 # ============================================================================ #
 # _monitorDrone
-def _monitorDrone(bid, drid, drone_list, client_list):
+def _monitorDrone(bid, drid, drone_list, client_list, r=None):
     '''Used within queen drone monitoring.
     Return: 
         0: Did nothing
@@ -323,7 +326,7 @@ def _monitorDrone(bid, drid, drone_list, client_list):
     to_run = True if drone_props.get('to_run') else False
 
     # check if drone is already running
-    is_running = _droneRunning(bid, drid, client_list)
+    is_running = _droneRunning(bid, drid, client_list, r=r)
 
     status = 0 # default; did nothing
 
@@ -347,16 +350,6 @@ def _monitorDrone(bid, drid, drone_list, client_list):
 # ============================================================================ #
 # COMMANDS
 # ============================================================================ #
-
-
-# TODO: modify redis tcp_keepalive ~ 10 s (and put in docs)
-
-
-# TODO: create new mode in queen.py: queenMonitor
-# fold queenListen into new mode
-    # run startAllDrones when it begins
-    # have it actively monitor and restart etc drones as necessary
-    # monitor from client list
 
 
 # ============================================================================ #
@@ -393,7 +386,7 @@ def action(action, bid=None, drid=None, drone_list=None):
 
 # ============================================================================ #
 # startDrone
-def startDrone(bid, drid, drone_list=None, check=False):
+def startDrone(bid, drid, drone_list=None, check=False, r=None):
     '''Start the drone at bid.drid if not running.
     '''
 
@@ -408,7 +401,7 @@ def startDrone(bid, drid, drone_list=None, check=False):
     _remOvRide(bid, drid)
 
     # check if drone is already obviously running
-    if check and _droneRunning(bid, drid):
+    if check and _droneRunning(bid, drid, r=r):
         print(f"Drone {bid}.{drid} is already running.")
         return
     
@@ -423,11 +416,11 @@ def startDrone(bid, drid, drone_list=None, check=False):
 
 # ============================================================================ #
 # stopDrone
-def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
+def stopDrone(bid, drid, drone_list=None, check=False, timeout=None, r=None):
     '''Stop the drone bid.drid if running.
     '''
 
-    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list)
+    drone_list, drone_props = _droneListAndProps(bid, drid, drone_list, r=None)
     
     # check for drone in master list
     if drone_props is None:
@@ -441,7 +434,7 @@ def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
         timeout = _addOvRide(bid, drid)
 
     # check if drone is obviously running
-    if check and not _droneRunning(bid, drid):
+    if check and not _droneRunning(bid, drid, r=r):
         print(f"Drone {bid}.{drid} is not running.")
         return
     
@@ -456,7 +449,7 @@ def stopDrone(bid, drid, drone_list=None, check=False, timeout=None):
 
 # ============================================================================ #
 # restartDrone
-def restartDrone(bid, drid, drone_list=None):
+def restartDrone(bid, drid, drone_list=None, r=None):
     '''Restart the drone bid.drid, whether running or not.
     '''
 
@@ -481,7 +474,7 @@ def restartDrone(bid, drid, drone_list=None):
 
 # ============================================================================ #
 # statusDrone
-def statusDrone(bid, drid, drone_list=None):
+def statusDrone(bid, drid, drone_list=None, r=None):
     '''
     '''
 
@@ -499,7 +492,7 @@ def statusDrone(bid, drid, drone_list=None):
     to_run = drone_props.get('to_run')
 
     # drone is running
-    running = _droneRunning(bid, drid)
+    running = _droneRunning(bid, drid, r=r)
 
     # status message
     msg = f"Status: Drone {id}: ip={ip}, to_run={to_run}, running={running}"
@@ -510,12 +503,15 @@ def statusDrone(bid, drid, drone_list=None):
 
 # ============================================================================ #
 # startAllDrones
-def startAllDrones():
+def startAllDrones(r=None):
     '''Start all drones in master drone list (if to_run=True).
     '''
 
     # this could potentially be threaded to run connections in parallel
     
+    if r is None:
+        r,p = _connectRedis()
+
     # load the master drone list
     drone_list = _droneList()
 
@@ -529,17 +525,20 @@ def startAllDrones():
         bid, drid = _bid_drid(id)
 
         # start drone
-        startDrone(bid=bid, drid=drid, drone_list=drone_list)      
+        startDrone(bid=bid, drid=drid, drone_list=drone_list, r=r)      
 
 
 # ============================================================================ #
 # stopAllDrones
-def stopAllDrones():
+def stopAllDrones(r=None):
     '''Stop all drones in master drone list (if running).
     '''
 
     # this could potentially be threaded to run connections in parallel
     
+    if r is None:
+        r,p = _connectRedis()
+
     # load the master drone list
     drone_list = _droneList()
 
@@ -549,17 +548,20 @@ def stopAllDrones():
         bid, drid = _bid_drid(id)
 
         # stop drone
-        stopDrone(bid=bid, drid=drid, drone_list=drone_list)
+        stopDrone(bid=bid, drid=drid, drone_list=drone_list, r=r)
 
 
 # ============================================================================ #
 # restartAllDrones
-def restartAllDrones():
+def restartAllDrones(r=None):
     '''Restart all drones in master drone list.
     '''
 
     # this could potentially be threaded to run connections in parallel
     
+    if r is None:
+        r,p = _connectRedis()
+
     # load the master drone list
     drone_list = _droneList()
 
@@ -569,4 +571,4 @@ def restartAllDrones():
         bid, drid = _bid_drid(id)
 
         # stop drone
-        restartDrone(bid=bid, drid=drid, drone_list=drone_list)
+        restartDrone(bid=bid, drid=drid, drone_list=drone_list, r=r)
