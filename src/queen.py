@@ -383,7 +383,10 @@ def print(*args, **kw):
     # _print(*args, **kw) # print to terminal
     # terminal printing can cause issues with asynchronous tasks
 
-    logging.info(' '.join(args))   # log to file
+    args = [str(arg) for arg in args] # not all args are str, so cast
+    msg = ' '.join(args) # convert to a single str
+    msg = msg.strip() # remove trailing space
+    logging.info(msg) # output to log
 
 
 # ============================================================================ #
