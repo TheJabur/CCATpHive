@@ -178,13 +178,13 @@ def executeCommand(com_num, args, kwargs):
     except Exception as e:              # command execution failed
         ret = f"Command execution error: {e}"
         print(f"Command {com_num} execution failed.")
-        logging.info('Command {com_num} execution failed.')
+        # logging.info('Command {com_num} execution failed.') # logging now in print
 
     else:                               # command execution successful
         if ret is None:                 # default return is None (success)
             ret = f"Command {com_num} executed." # success ack.
         print(f"Command {com_num} execution done.")
-        logging.info(f'Command {com_num} execution successful.')
+        # logging.info(f'Command {com_num} execution successful.')
 
     return ret
 
@@ -196,26 +196,30 @@ def publishResponse(resp, r, chan_sub):
     chan_pub = rc.getReturnChan(chan_sub)
     print(chan_pub)
 
-    print(f"Preparing response... ", end="")
+    # print(f"Preparing response... ", end="")
     try: #####
         ret = pickle.dumps(resp)        # pickle serializes to bytes obj.
         # this is needed because redis pubsub only allows bytes objects
     except Exception as e:
-        _print("Failed.")
-        logging.info(f'Publish response failed.')
+        print(f'Publish response failed.')
+        # _print("Failed.")
+        # logging.info(f'Publish response failed.')
         return                          # exit: need ret to send
     else:
-        _print("Done.")
+        pass
+        # _print("Done.")
 
-    print(f"Sending response... ", end="")
+    # print(f"Sending response... ", end="")
     try: #####
         r.publish(chan_pub, ret)       # publish with redis
     except Exception as e:
-        _print("Failed.")
-        logging.info(f'Publish response failed.')
+        print(f'Publish response failed.')
+        # _print("Failed.")
+        # logging.info(f'Publish response failed.')
     else:
-        _print(f"Done.")
-        logging.info(f'Publish response successful.')
+        print(f'Publish response successful.')
+        # _print(f"Done.")
+        # logging.info(f'Publish response successful.')
 
 
 # ============================================================================ #
