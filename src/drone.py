@@ -2,7 +2,7 @@
 # drone.py
 # Board side Redis interface script.
 # James Burgoyne jburgoyne@phas.ubc.ca
-# CCAT/FYST 2023 
+# CCAT/FYST 2024 
 # ============================================================================ #
 
 
@@ -26,18 +26,6 @@ import redis_channels as rc
 
 
 
-# ============================================================================ #
-# CONFIG
-# ============================================================================ #
-
-
-logging.basicConfig(
-    filename='../logs/board.log', level=logging.DEBUG,
-    style='{', datefmt='%Y-%m-%d %H:%M:%S', 
-    format='{asctime} {levelname} {filename}:{lineno}: {message}'
-)
-
-
 
 # ============================================================================ #
 # MAIN
@@ -46,6 +34,13 @@ logging.basicConfig(
 
 def main():
     # CTRL-c to exit out of listen mode
+
+    # only modify log if this is main
+    logging.basicConfig(
+        filename='../logs/board.log', level=logging.DEBUG,
+        style='{', datefmt='%Y-%m-%d %H:%M:%S', 
+        format='{asctime} {levelname} {filename}:{lineno}: {message}'
+    )
 
     args = setupArgparse() # get command line arguments
 
@@ -67,13 +62,28 @@ def main():
 
 # ============================================================================ #
 # print monkeypatch
-# the print statement should be further modified
-# to save all statements into a log file
 _print = print 
 def print(*args, **kw):
-    # add current filename in front
-    _print(f"{os.path.basename(__file__)}: ", end='')
-    _print(*args, **kw)
+    '''Override the print statement.
+    '''
+    
+    msg = ""
+
+    # add drone id
+    if cfg.bid and cfg.drid:
+        msg += f"drone={cfg.bid}.{cfg.drid}: "
+
+    # add current filename
+    msg += f"{os.path.basename(__file__)}: "
+
+    # add print strings
+    msg += " ".join(map(str, args))
+
+    # log msg
+    logging.info(msg)
+
+    # print to console
+    _print(msg, **kw)
 
 
 # ============================================================================ #
