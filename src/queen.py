@@ -379,8 +379,11 @@ def getClientListLight():
 #  print monkeypatch
 _print = print 
 def print(*args, **kw):
-    _print(*args, **kw) # print to terminal
-    # logging.info(' '.join(args))   # log to file
+    
+    # _print(*args, **kw) # print to terminal
+    # terminal printing can cause issues with asynchronous tasks
+
+    logging.info(' '.join(args))   # log to file
 
 
 # ============================================================================ #
