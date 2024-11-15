@@ -31,11 +31,11 @@ import sys_info
 # ============================================================================ #
 
 
-logging.basicConfig(
-    filename=f'{parentDir(__file__)}/logs/board.log', level=logging.DEBUG,
-    style='{', datefmt='%Y-%m-%d %H:%M:%S', 
-    format='{asctime} {levelname} {filename}:{lineno}: {message}'
-)
+# logging.basicConfig(
+#     filename=f'{parentDir(__file__)}/logs/board.log', level=logging.DEBUG,
+#     style='{', datefmt='%Y-%m-%d %H:%M:%S', 
+#     format='{asctime} {levelname} {filename}:{lineno}: {message}'
+# )
 
 # official list of alcove commands
 # alcove command keys start at 10
