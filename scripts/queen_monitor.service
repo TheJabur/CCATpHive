@@ -7,6 +7,7 @@ User=root
 Type=simple
 ExecStart=/usr/bin/python3 /home/player1/primecam_readout/src/queen_cli.py 8 -q
 Restart=always
+Environment="PYTHONUNBUFFERED=1"
 
 [Install]
 WantedBy=multi-user.target
