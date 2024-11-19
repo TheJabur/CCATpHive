@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/home/xilinx/primecam_readout/src
+WorkingDirectory=/home/player1/primecam_readout/src
 ExecStart=/usr/bin/python3 /home/player1/primecam_readout/src/queen_cli.py 8 -q
 Restart=always
 Environment="PYTHONUNBUFFERED=1"
