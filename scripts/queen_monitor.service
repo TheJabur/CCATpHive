@@ -1,0 +1,11 @@
+[Unit]
+Description=Queen Monitor Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/player1/primecam_readout/src/queen_cli.py 8 -q
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
