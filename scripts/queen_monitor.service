@@ -3,7 +3,7 @@ Description=Queen Monitor Daemon
 After=network.target
 
 [Service]
-User=root
+User=player1
 WorkingDirectory=/home/player1/primecam_readout/src
 ExecStart=/usr/bin/python3 /home/player1/primecam_readout/src/queen_cli.py 8 -q
 Restart=always
