@@ -9,7 +9,7 @@ _ENABLE_DEBUG = False
 class Transceiver:
     def __init__(self, comport) -> None:
         self.ser = serial.Serial(comport, baudrate=115200, timeout=5)
-        time.sleep(.250)
+        time.sleep(1.0)
         if self.ser.is_open:
             self.ser.write(b"get_id\n")
             resp = self.ser.read_until(b"\n")
