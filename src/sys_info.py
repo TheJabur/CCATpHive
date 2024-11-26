@@ -47,11 +47,12 @@ def sys_info_v():
         _getVersRedis(),             # Redis version
         _getNetwork(),               # network connections info
         _getTemps(),                 # board temperature sensors
-        # _getPtp(),                   # PTP info
+        # _getPtp(), # PTP info
         _getRecentAuthLogEvents(),   # recent auth log entries
         _getRecentSysLogEvents(),    # recent sys log entries
         _getRecentDmesgEvents(),     # recent dmesg entries
         _getVersApt(),               # apt list
+        _getNetwork(),               # network connections info
     ]
 
     merged_dict = {}
@@ -75,15 +76,11 @@ def sys_info():
         _getUptime(),                # system uptime
         _getVersPrimecam_readout(),  # primecam_readout version
         _getVersFirmwareRfsoc(),     # firmware version
-        # _getVersOs(),                # OS version
-        # _getVersRedis(),             # Redis version
         _getTemps(),                 # board temperature sensors
-        # _getPtp(),                   # PTP info
         _getRecentAuthLogEvents(),   # recent auth log entries
         _getRecentSysLogEvents(),    # recent sys log entries
         _getRecentDmesgEvents(),     # recent dmesg entries
         _getNetwork(),               # network connections info
-        # _getVersApt(),               # apt list
     ]
 
     merged_dict = {}
@@ -129,6 +126,14 @@ def _getVersPrimecam_readout():
     file_path = f'../VERSION' # {parentDir()}
     with open(file_path, 'r') as version_file:
         version = version_file.read().strip()
+
+    ## the current method requires a build action
+    ## the following method does not
+    ## however git is not a standard library
+    ## and it would fail if the code is removed from git
+    # import git
+    # repo = git.Repo(search_parent_directories=True)
+    # version = repo.head.commit.hexsha
 
     return {'version:primecam_readout':version}
 
