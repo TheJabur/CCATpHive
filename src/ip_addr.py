@@ -15,7 +15,10 @@
 import socket
 import psutil
 import redis
-from config import board as cfg
+
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
+
 
 
 
@@ -62,10 +65,10 @@ def tIP_origin(drid:int, sep='.', asHex=False):
     """
 
     ip = None
-    if drid == 1: ip = cfg.udp_ori_ip_1
-    if drid == 2: ip = cfg.udp_ori_ip_2
-    if drid == 3: ip = cfg.udp_ori_ip_3
-    if drid == 4: ip = cfg.udp_ori_ip_4
+    if drid == 1: ip = cfg_b.udp_ori_ip_1
+    if drid == 2: ip = cfg_b.udp_ori_ip_2
+    if drid == 3: ip = cfg_b.udp_ori_ip_3
+    if drid == 4: ip = cfg_b.udp_ori_ip_4
 
     if asHex:
         hexip =  IPtoHex(ip)
@@ -96,7 +99,7 @@ def mac_origin(sep=':'):
     """The UDP timestream network mac address origin (this board)
     """
 
-    return strSep(cfg.udp_ori_mac, ':', sep)
+    return strSep(cfg_b.udp_ori_mac, ':', sep)
 
 
 def getDroneTimestreamPort():
@@ -111,16 +114,16 @@ def tIP_destination(sep='.', asHex=False):
     """
     
     if asHex:
-        return strSep(IPtoHex(cfg.udp_dest_ip), ':', sep)
+        return strSep(IPtoHex(cfg_b.udp_dest_ip), ':', sep)
     
-    return strSep(cfg.udp_dest_ip, '.', sep)
+    return strSep(cfg_b.udp_dest_ip, '.', sep)
 
 
 def mac_destination(sep=':'):
     """The UDP timestream destination mac address.
     """
     
-    return strSep(cfg.udp_dest_mac, ':', sep)
+    return strSep(cfg_b.udp_dest_mac, ':', sep)
 
 
 # ============================================================================ #

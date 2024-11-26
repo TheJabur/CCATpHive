@@ -15,7 +15,8 @@
 import uuid
 # from dataclasses import dataclass, field
 
-from config import board as cfg_b
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
 
 
 

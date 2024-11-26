@@ -14,21 +14,25 @@
 
 import os
 
+import alcove_commands.board_io as io
+import queen_commands.control_io as cio
+
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
+
+try: import xrfdc # type: ignore
+except ImportError: xrfdc = None
+
+try: from pynq import Overlay # type: ignore
+except ImportError: Overlay = None
+
+# FIRMWARE UPLOAD
 try:
-    from config import board as cfg
-    import alcove_commands.board_io as io
-    import queen_commands.control_io as cio
-
-    import xrfdc # type: ignore
-    from pynq import Overlay
-    
-    # FIRMWARE UPLOAD
-    firmware_file = os.path.join(cfg.dir_root, cfg.firmware_file)
+    firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
     firmware = Overlay(firmware_file, ignore_version=True, download=False)
-
 except Exception as e: 
     firmware = None
-    # print(f"Error loading firmware: {e}")
+    
 
 
 
@@ -73,7 +77,7 @@ def timestreamOn(on=True):
     udp_control = firmware.gpio_udp_info_control
     
     # current drone channel
-    chan = cfg.drid
+    chan = cfg_b.drid
     chan_bit = 1 << (chan - 1)  # in hex
 
     # chan dependent delay instead of resource locking
@@ -117,7 +121,7 @@ def userPacket(data):
     udp_control = firmware.gpio_udp_info_control
     
     # current drone channel
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     # chan dependent delay instead of resource locking
     delay_factor = 0.1 # in seconds
@@ -142,7 +146,7 @@ def userPacket(data):
 def userPacketInfo(data):
     # 16 bit data
     # current drone channel
-    chan = cfg.drid
+    chan = cfg_b.drid
     udp_control = firmware.gpio_udp_info_control
     we = 2**19
     info = 0*2**18
@@ -159,7 +163,7 @@ def userPacketInfo(data):
 def writeChannelCount(num_chans):
     # 16 bit value for number of active tones/channels in packet
     # current drone channel
-    chan = cfg.drid
+    chan = cfg_b.drid
     udp_control = firmware.gpio_udp_info_control
     we = 2**19
     #info = 0*2**18
@@ -182,9 +186,9 @@ def generateWaveDdr4(freq_list, amp_list, phi):
     amp_list = np.real(amp_list)
     phi = np.real(phi)
 
-    fs = cfg.wf_fs # 512e6 
-    lut_len = cfg.wf_lut_len # 2**20
-    fft_len = cfg.wf_fft_len # 1024
+    fs = cfg_b.wf_fs # 512e6 
+    lut_len = cfg_b.wf_lut_len # 2**20
+    fft_len = cfg_b.wf_fft_len # 1024
     k = np.int64(np.round(freq_list/(fs/lut_len)))
     freq_actual = k*(fs/lut_len)
     X = np.zeros(lut_len,dtype='complex')
@@ -296,12 +300,12 @@ def _getSnapData(chan, mux_sel, wrap=False):
 # ============================================================================ #
 # getSnapData
 def getSnapData(mux_sel, wrap=True):
-    chan = cfg.drid
+    chan = cfg_b.drid
     return _getSnapData(chan, int(mux_sel), wrap=wrap)
 
 def getADCrms():
     import numpy as np
-    chan = cfg.drid
+    chan = cfg_b.drid
     I, Q = _getSnapData(chan,0,wrap=False)
     z = I + 1j*Q
     rms = np.sqrt(np.mean(z*np.conj(z)))
@@ -317,7 +321,7 @@ def _setNCLO(chan, lofreq):
 
     # import xrfdc
     rf_data_conv = firmware.usp_rf_data_converter_0
-    name = os.path.splitext(os.path.basename(cfg.firmware_file))[0]
+    name = os.path.splitext(os.path.basename(cfg_b.firmware_file))[0]
     if int(name[7:9]) >= 13:
         tb_indices = {
             1: [1,0,1,3], 2: [1,1,1,2], 3: [0,1,1,0], 4: [0,0,1,1]}
@@ -370,7 +374,7 @@ def setNCLO(f_lo):
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
     f_lo = int(f_lo)
     _setNCLO(chan, f_lo)
     io.save(io.file.f_center_vna, f_lo*1e6)
@@ -385,7 +389,7 @@ def getNCLO(chan=None):
     import numpy as np
 
     if chan is None:
-        chan = cfg.drid
+        chan = cfg_b.drid
 
     f_lo = float(_getNCLO(chan))
 
@@ -414,7 +418,7 @@ def _setNCLO2(chan, lofreq):
         # freq in MHz
         # returns 32 bit signed integer for setting nclo2
         # MHz_per_int = 512.0/2**22 #MHz per_step !check with spec-analyzer
-        MHz_per_int = cfg.wf_fs/1e6/2**22
+        MHz_per_int = cfg_b.wf_fs/1e6/2**22
         digi_val = int(np.round(freqMHz/MHz_per_int))
         actual_freq = digi_val*MHz_per_int
         return digi_val, actual_freq
@@ -455,7 +459,7 @@ def setFineNCLO(df_lo):
 
     # import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
     df_lo = float(df_lo)
     return _setNCLO2(chan, df_lo)
     # TODO: modify f_center to reflect this fine adjustment
@@ -520,7 +524,7 @@ def setAtten(direction, atten):
     direction - string "sense" or "drive"
     atten - float attenuation value in dB min 0 max 31.75
     """
-    chan = cfg.drid
+    chan = cfg_b.drid
     atten = float(atten)
     direction = str(direction)
     return _setAtten(chan,direction,atten)

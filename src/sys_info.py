@@ -10,10 +10,14 @@ import subprocess
 import numpy as np
 from datetime import datetime, timezone
 
-from config import queen as cfg_q
-from config import board as cfg_b
 import alcove_commands.board_utilities as utils
 import alcove_commands.board_io as io
+
+try: from config import queen as cfg_q
+except ImportError: cfg_q = None
+
+try: from config import board as cfg_b
+except ImportError: cfg_b = None  
 
 # try:
 #     # import xrfdc # type: ignore

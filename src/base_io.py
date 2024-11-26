@@ -6,11 +6,9 @@
 # ============================================================================ #
 
 
+try: from config import board as cfg_b
+except ImportError: cfg_b = None  
 
-try:
-    from config import board as cfg
-except Exception as e: 
-    print(f"board_io.py global attribute issue.")
 
 
 
@@ -200,8 +198,8 @@ def returnWrapper(file, data):
 
     d = {
         "wrapped":  True,
-        "bid":      cfg.bid,
-        "drid":     cfg.drid,
+        "bid":      cfg_b.bid,
+        "drid":     cfg_b.drid,
         "filename": file['fname'],
         "ext":      file['file_type'],
         "timestamp":_timestamp(),
