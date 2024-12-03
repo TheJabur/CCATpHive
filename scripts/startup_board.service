@@ -1,0 +1,12 @@
+[Unit]
+Description=Board startup script
+After=network.target
+
+[Service]
+ExecStart=/home/xilinx/primecam_readout/scripts/startup_board.sh
+Restart=always
+User=xilinx
+WorkingDirectory=/home/xilinx/primecam_readout/scripts
+
+[Install]
+WantedBy=multi-user.target
