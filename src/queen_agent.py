@@ -11,6 +11,57 @@ from ocs import ocs_agent, site_config
 
 import queen
 import alcove
+import drone_control
+
+
+
+
+# ======================================================================== #
+# main
+def main(args=None):
+    args = site_config.parse_args(agent_class='ReadoutAgent', args=args)
+    agent, runner = ocs_agent.init_site_agent(args)
+    readout = ReadoutAgent(agent)
+
+    # convenience function wrapping register_task
+    def rt(s, f, b=True):
+        return agent.register_task(s, f, blocking=b)
+
+    # queen commands
+    rt('getKeyValue', readout.getKeyValue)
+    rt('setKeyValue', readout.setKeyValue)
+    rt('getClientList', readout.getClientList)
+    rt('getClientListLight', readout.getClientListLight)
+    rt('action', readout.action)
+
+    # drone commands
+    rt('setNCLO', readout.setNCLO)
+    rt('setFineNCLO', readout.setFineNCLO)
+    rt('getSnapData', readout.getSnapData)
+    rt('getADCrms', readout.getADCrms)
+    rt('writeTestTone', readout.writeTestTone)
+    rt('writeNewVnaComb', readout.writeNewVnaComb)
+    rt('writeTargCombFromVnaSweep', readout.writeTargCombFromVnaSweep)
+    rt('writeTargCombFromTargSweep', readout.writeTargCombFromTargSweep)
+    rt('writeCombFromCustomList', readout.writeCombFromCustomList)
+    rt('createCustomCombFilesFromCurrentComb', 
+       readout.createCustomCombFilesFromCurrentComb)
+    rt('modifyCustomCombAmps', readout.modifyCustomCombAmps)
+    rt('writeTargCombFromCustomList', readout.writeTargCombFromCustomList)
+    rt('vnaSweep', readout.vnaSweep)
+    rt('targetSweep', readout.targetSweep)
+    rt('customSweep', readout.customSweep)
+    rt('findVnaResonators', readout.findVnaResonators)
+    rt('findTargResonators', readout.findTargResonators)
+    rt('findCalTones', readout.findCalTones)
+    rt('sys_info', readout.sys_info)
+    rt('sys_info_v', readout.sys_info_v)
+    rt('timestreamOn', readout.timestreamOn)
+    rt('userPacketInfo', readout.userPacketInfo)
+    rt('setAtten', readout.setAtten)
+
+    runner.run(agent, auto_reconnect=True)
+
 
 
 
@@ -31,22 +82,89 @@ class ReadoutAgent:
         self.agent = agent
 
 
+    # ======================================================================== #
+    # getKeyValue
+    @ocs_agent.param('key', type=str)
+    def getKeyValue(self, session, params):
+        """getKeyValue()
+
+        **Task** - Return the value for the given key.
+
+        Args
+        -------
+        key: str
+            The key to fetch the value for.
+        """
+        
+        return True, f"{params['key']}: {queen.getKeyValue(params['key'])}"
+
+
+    # ======================================================================== #
+    # setKeyValue
+    @ocs_agent.param('key', type=str)
+    @ocs_agent.param('value', type=str)
+    def setKeyValue(self, session, params):
+        """getKeyValue()
+
+        **Task** - Set given key to given value.
+
+        Args
+        -------
+        key: str
+            The key to set.
+        value: str
+            The value to set for key.
+        """
+        
+        return True, f"{params['key']}: {queen.setKeyValue(params['key'], 
+                                                           params['value'])}"
+
 
     # ======================================================================== #
     # .getClientList
     def getClientList(self, session, params):
         """getClientList()
 
-        **Task** - Return the current list of clients attached to the Redis server.
+        **Task** - Return the list of Redis clients, verbose.
         """
 
         return True, f"client list: {queen.getClientList()}"
+    
+    
+    # ======================================================================== #
+    # .getClientListLight
+    def getClientListLight(self, session, params):
+        """getClientListLight()
+
+        **Task** - Return the list of Redis clients.
+        """
+
+        return True, f"client list: {queen.getClientListLight()}"
 
 
     # ======================================================================== #
-    # .queenListenMode
-    # 2 : listenMode
-    # TODO
+    # .action
+    @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('action', type=str)
+    def action(self, session, params):
+        """action()
+
+        **Task** - Perform the drone control action, e.g. 'start'.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+        action: str
+            Drone control action to perform:
+            'start', 'stop', 'restart', 'status', 
+            'startAllDrones', 'stopAllDrones', 'restartAllDrones'
+        """
+
+        action = params['action']
+        bid, drid = drone_control._bid_drid(params['com_to'])
+
+        return True, f"action: {drone_control.action(action, bid, drid)}"
 
 
     # ======================================================================== #
@@ -131,6 +249,23 @@ class ReadoutAgent:
         
         # return is a fail message str or number of clients int
         return True, f"getSnapData: {rtn}"
+    
+    
+    # ======================================================================== #
+    # .getADCrms
+    @ocs_agent.param('com_to', default=None, type=str)
+    def getADCrms(self, session, params):
+        """getADCrms()
+
+        **Task** - Return the ADC RMS.
+        """
+
+        rtn = _sendAlcoveCommand(
+            com_str  = 'getADCrms', 
+            com_to   = params['com_to'])
+        
+        # return is a fail message str or number of clients int
+        return True, f"getADCrms: {rtn}"
     
 
     # ======================================================================== #
@@ -323,9 +458,35 @@ class ReadoutAgent:
 
 
     # ======================================================================== #
+    # .writeTargCombFromCustomList
+    @ocs_agent.param('com_to', default=None, type=str)
+    def writeTargCombFromCustomList(self, session, params):
+        """writeTargCombFromCustomList()
+
+        **Task** - Write the target comb from custom tone files:
+            alcove_commands/custom_freqs.npy
+            alcove_commands/custom_amps.npy
+            alcove_commands/custom_phis.npy
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        """
+  
+        rtn = _sendAlcoveCommand(
+            com_str  = 'writeTargCombFromCustomList', 
+            com_to   = params['com_to'])
+        
+        # return is a fail message str or number of clients int
+        return True, f"writeTargCombFromCustomList: {rtn}"
+
+
+    # ======================================================================== #
     # .vnaSweep
     @ocs_agent.param('com_to', default=None, type=str)
-    @ocs_agent.param('N_steps', default=500, type=int)
     def vnaSweep(self, session, params):
         """vnaSweep()
 
@@ -337,14 +498,11 @@ class ReadoutAgent:
             Drone to send command to in format bid.drid.
             If None, will send to all drones.
             Default is None.
-        N_steps: int
-            Number of LO frequencies to divide each channel into.
         """
   
         rtn = _sendAlcoveCommand(
             com_str  = 'vnaSweep', 
-            com_to   = params['com_to'],
-            com_args = f'N_steps={params["N_steps"]}')
+            com_to   = params['com_to'])
         
         # return is a fail message str or number of clients int
         return True, f"vnaSweep: {rtn}"
@@ -353,12 +511,10 @@ class ReadoutAgent:
     # ======================================================================== #
     # .targetSweep
     @ocs_agent.param('com_to', default=None, type=str)
-    @ocs_agent.param('N_steps', default=500, type=int)
-    @ocs_agent.param('chan_bandwidth', default=0.2, type=float)
     def targetSweep(self, session, params):
         """targetSweep()
 
-        **Task** - Perform a stepped frequency sweep with current comb, save as target sweep.
+        **Task** - Perform a sweep with current comb, save as target sweep.
 
         Args
         -------
@@ -366,37 +522,24 @@ class ReadoutAgent:
             Drone to send command to in format bid.drid.
             If None, will send to all drones.
             Default is None.
-        N_steps: int
-            Number of LO frequencies to divide each channel into.
-        chan_bandwidth: float
         """
   
         rtn = _sendAlcoveCommand(
             com_str  = 'targetSweep', 
-            com_to   = params['com_to'],
-            com_args = f'N_steps={params["N_steps"]}, chan_bandwidth={params["chan_bandwidth"]}')
+            com_to   = params['com_to'])
         
         # return is a fail message str or number of clients int
         return True, f"targetSweep: {rtn}"
 
 
     # ======================================================================== #
-    # .findVnaResonators
+    # .customSweep
     @ocs_agent.param('com_to', default=None, type=str)
-    @ocs_agent.param('stitch_bw', default=500, type=int)
-    @ocs_agent.param('stitch_sw', default=100, type=int)
-    @ocs_agent.param('f_hi', default=50, type=int)
-    @ocs_agent.param('f_lo', default=1, type=int)
-    @ocs_agent.param('prom_dB', default=1, type=int)
-    @ocs_agent.param('distance', default=30, type=int)
-    @ocs_agent.param('width_min', default=5, type=int)
-    @ocs_agent.param('width_max', default=100, type=int)
-    def findVnaResonators(self, session, params):
-        """findVnaResonators()
+    @ocs_agent.param('bw', default=None, type=float)
+    def customSweep(self, session, params):
+        """customSweep()
 
-        **Task** - Find the resonator peak frequencies from vnaSweep S21. 
-            See findResonators() for possible arguments. 
-            Note that vnaSweep must be run first.
+        **Task** - Perform a sweep with current (custom) comb.
 
         Args
         -------
@@ -404,28 +547,93 @@ class ReadoutAgent:
             Drone to send command to in format bid.drid.
             If None, will send to all drones.
             Default is None.
-        stitch_bw: int 
-            Width of the stitch bins.
-        stitch_sw: int 
-            Width of slice (at ends) of each stitch bin to take median.
-        f_hi: float
-            Highpass filter cutoff frequency. [data units]
-        f_lo: float
-            lowpass filter cutoff frequency. [data units]
-        prom_dB: float
-            Peak prominence cutoff. [dB]
-        distance: int
-            Min distance between peaks. [bins]
-        width_min: int
+        bw: float
+            Channel bandwidth.
+        """
+    
+        if params["bw"]:
+            rtn = _sendAlcoveCommand(
+                com_str  = 'customSweep', 
+                com_to   = params['com_to'],
+                com_args = f'bw={params["bw"]}')
+        else: # allow func bw default
+            rtn = _sendAlcoveCommand(
+                com_str  = 'customSweep', 
+                com_to   = params['com_to'])
+        
+        # return is a fail message str or number of clients int
+        return True, f"customSweep: {rtn}"
+
+
+    # ======================================================================== #
+    # .findVnaResonators
+    @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('peak_prom_std', default=10, type=float)
+    @ocs_agent.param('peak_prom_db', default=0, type=float)
+    @ocs_agent.param('peak_dis', default=100, type=int)
+    @ocs_agent.param('width_min', default=5, type=int)
+    @ocs_agent.param('width_max', default=100, type=int)
+    @ocs_agent.param('stitch', default=True, type=bool)
+    @ocs_agent.param('stitch_sw', default=100, type=int)
+    @ocs_agent.param('remove_cont', default=True, type=bool)
+    @ocs_agent.param('continuum_wn', default=300, type=int)
+    @ocs_agent.param('remove_noise', default=True, type=bool)
+    @ocs_agent.param('noise_wn', default=30_000, type=int)
+    def findVnaResonators(self, session, params):
+        """findVnaResonators()
+
+        **Task** - Find the resonator peak frequencies from vnaSweep S21. 
+        Note that vnaSweep must be run first.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        peak_prom_std: (float) 
+            Peak height from surroundings, in noise std multiples.
+            Uses larger of peak_prom_db or peak_prom_std.
+        peak_prom_db: (float)
+            Peak height from surroundings, in Db.
+            Uses larger of peak_prom_db or peak_prom_std.
+        peak_dis: (int) 
+            Min distance between peaks [bins].
+        width_min: (int) 
             Peak width minimum. [bins]
-        width_max: int
+        width_max: (int) 
             Peak width maximum. [bins]
+        stitch: (bool) 
+            Whether to stitch (comb discontinuities).
+        stitch_sw: (int) 
+            Discontinuity edge size for alignment [bins].
+        remove_cont: (bool) 
+            Whether to subtract the continuum.
+        continuum_wn: (int) 
+            Continuum filter cutoff frequency [Hz].
+        remove_noise: (bool) 
+            Whether to subtract noise.
+        noise_wn: (int) 
+            Noise filter cutoff frequency [Hz].
         """
   
+        com_args = ''
+        com_args += f'peak_prom_std={params["stitch_bw"]}, '
+        com_args += f'peak_prom_db={params["peak_prom_db"]}, '
+        com_args += f'peak_dis={params["peak_dis"]}, '
+        com_args += f'width_min={params["width_min"]}, '
+        com_args += f'width_max={params["width_max"]}, '
+        com_args += f'stitch={params["stitch"]}, '
+        com_args += f'stitch_sw={params["stitch_sw"]}, '
+        com_args += f'remove_cont={params["remove_cont"]}, '
+        com_args += f'continuum_wn={params["continuum_wn"]}, '
+        com_args += f'remove_noise={params["remove_noise"]}, '
+        com_args += f'noise_wn={params["noise_wn"]}'
+
         rtn = _sendAlcoveCommand(
             com_str  = 'findVnaResonators', 
             com_to   = params['com_to'],
-            com_args = f'stitch_bw={params["stitch_bw"]}, stitch_sw={params["stitch_sw"]}, f_hi={params["f_hi"]}, f_lo={params["f_lo"]}, prom_dB={params["prom_dB"]}, distance={params["distance"]}, width_min={params["width_min"]}, width_max={params["width_max"]}')
+            com_args = com_args)
         
         # return is a fail message str or number of clients int
         return True, f"findVnaResonators: {rtn}"
@@ -498,6 +706,145 @@ class ReadoutAgent:
         return True, f"findCalTones: {rtn}"
 
 
+    # ======================================================================== #
+    # .sys_info
+    @ocs_agent.param('com_to', default=None, type=str)
+    def sys_info(self, session, params):
+        """sys_info()
+
+        **Task** - Get system info from board.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        """
+  
+        rtn = _sendAlcoveCommand(
+            com_str  = 'sys_info', 
+            com_to   = params['com_to'])
+        
+        # return is a fail message str or number of clients int
+        return True, f"sys_info: {rtn}"
+    
+
+    # ======================================================================== #
+    # .sys_info_v
+    @ocs_agent.param('com_to', default=None, type=str)
+    def sys_info_v(self, session, params):
+        """sys_info_v()
+
+        **Task** - Get system info from board, verbose.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        """
+  
+        rtn = _sendAlcoveCommand(
+            com_str  = 'sys_info_v', 
+            com_to   = params['com_to'])
+        
+        # return is a fail message str or number of clients int
+        return True, f"sys_info_v: {rtn}"
+
+
+    # ======================================================================== #
+    # .timestreamOn
+    @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('on', default=True, type=bool)
+    def timestreamOn(self, session, params):
+        """timestreamOn()
+
+        **Task** - Turn the boards date timestream on/off.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        on: bool
+            Timestream on/off.
+        """
+  
+        rtn = _sendAlcoveCommand(
+            com_str  = 'timestreamOn', 
+            com_to   = params['com_to'],
+            com_args = f'on={params['on']},')
+        
+        # return is a fail message str or number of clients int
+        return True, f"timestreamOn: {rtn}"
+    
+
+    # ======================================================================== #
+    # .userPacketInfo
+    @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('data', type=int)
+    def userPacketInfo(self, session, params):
+        """userPacketInfo()
+
+        **Task** - Write given data to timestream packet.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        data: 16 bit int
+            Data to write to packet.
+        """
+  
+        rtn = _sendAlcoveCommand(
+            com_str  = 'userPacketInfo', 
+            com_to   = params['com_to'],
+            com_args = f'data={params['data']},')
+        
+        # return is a fail message str or number of clients int
+        return True, f"userPacketInfo: {rtn}"
+
+
+    # ======================================================================== #
+    # .setAtten
+    @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('direction', type=str)
+    @ocs_agent.param('atten', type=float)
+    def setAtten(self, session, params):
+        """setAtten()
+
+        **Task** - Set attenuator value on drive/sense gain board.
+
+        Args
+        -------
+        com_to: str
+            Drone to send command to in format bid.drid.
+            If None, will send to all drones.
+            Default is None.
+        direction: (str)
+            "sense" or "drive"
+        atten: (float)
+            Attenuation value in dB min 0 max 31.75
+        """
+  
+        direction = params['direction']
+        atten = params['atten']
+
+        rtn = _sendAlcoveCommand(
+            com_str  = 'setAtten', 
+            com_to   = params['com_to'],
+            com_args = f'direction={direction}, atten={atten},')
+        
+        # return is a fail message str or number of clients int
+        return True, f"setAtten: {rtn}"
+    
+
+
 
 # ============================================================================ #
 # INTERNAL FUNCTIONS
@@ -551,32 +898,6 @@ def _sendAlcoveCommand(com_str, com_to, com_args=None):
         return queen.alcoveCommand(com_num, all_boards=True, args=com_args)
     
 
-
-# ============================================================================ #
-# MAIN
-# ============================================================================ #
-def main(args=None):
-    args = site_config.parse_args(agent_class='ReadoutAgent', args=args)
-    agent, runner = ocs_agent.init_site_agent(args)
-    readout = ReadoutAgent(agent)
-
-    agent.register_task('getClientList', readout.getClientList, blocking=True)
-    agent.register_task('setNCLO', readout.setNCLO, blocking=True)
-    agent.register_task('setFineNCLO', readout.setFineNCLO, blocking=True)
-    agent.register_task('getSnapData', readout.getSnapData, blocking=True)
-    agent.register_task('writeNewVnaComb', readout.writeNewVnaComb, blocking=True)
-    agent.register_task('writeTargCombFromVnaSweep', readout.writeTargCombFromVnaSweep, blocking=True)
-    agent.register_task('writeTargCombFromTargSweep', readout.writeTargCombFromTargSweep, blocking=True)
-    agent.register_task('writeCombFromCustomList', readout.writeCombFromCustomList, blocking=True)
-    agent.register_task('createCustomCombFilesFromCurrentComb', readout.createCustomCombFilesFromCurrentComb, blocking=True)
-    agent.register_task('modifyCustomCombAmps', readout.modifyCustomCombAmps, blocking=True)
-    agent.register_task('vnaSweep', readout.vnaSweep, blocking=True)
-    agent.register_task('targetSweep', readout.targetSweep, blocking=True)
-    agent.register_task('findVnaResonators', readout.findVnaResonators, blocking=True)
-    agent.register_task('findTargResonators', readout.findTargResonators, blocking=True)
-    agent.register_task('findCalTones', readout.findCalTones, blocking=True)
-
-    runner.run(agent, auto_reconnect=True)
 
 
 if __name__ == '__main__':

@@ -208,13 +208,8 @@ def _findResonators_alt(f, Z,
 
 # ============================================================================ #
 # _findMins
-def _findMins(f, Z,
-    stitch_bw=500, stitch_sw=100,
-    f_hi=50, f_lo=1, prom_dB=1,
-    distance=30, width_min=5, width_max=100):
+def _findMins(f, Z, stitch_bw=500):
     """Find the minimum (resonator peak) in each targ bin.
-
-    Parameters are consistent with _findResonators.
     """
     
     import numpy as np
@@ -222,13 +217,6 @@ def _findMins(f, Z,
     # type enforcement
     # required since parameters can get passed as strings
     stitch_bw     = int(stitch_bw)
-    # stitch_sw     = int(stitch_sw)
-    # f_hi          = int(f_hi)
-    # f_lo          = int(f_lo)
-    # prom_dB       = float(prom_dB)
-    # distance      = int(distance)
-    # width_min     = int(width_min)
-    # width_max     = int(width_max)
 
     m = np.abs(Z)
     

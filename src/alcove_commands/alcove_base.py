@@ -48,7 +48,7 @@ except Exception as e:
 
 
 # ============================================================================ #
-# timestreamOn
+# safe_cast_to_int
 def safe_cast_to_int(data_str):
     try:
         if data_str.lower().startswith('0x'):   # hex
@@ -303,6 +303,9 @@ def getSnapData(mux_sel, wrap=True):
     chan = cfg_b.drid
     return _getSnapData(chan, int(mux_sel), wrap=wrap)
 
+
+# ============================================================================ #
+# getADCrms
 def getADCrms():
     import numpy as np
     chan = cfg_b.drid
@@ -311,6 +314,7 @@ def getADCrms():
     rms = np.sqrt(np.mean(z*np.conj(z)))
     print("RMS: ",rms)
     return
+
 
 # ============================================================================ #
 # _setNCLO
