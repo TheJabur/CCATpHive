@@ -353,6 +353,8 @@ Add every drone you want running to the file with an entry that contains the boa
 
 *'1.1': {ip: "192.168.2.99", to\_run: true}*
 
+The SSH username and password is assumed to be consistent across all boards, and is set in the queen config file.
+
 ##### Automated drone monitoring {#automated-drone-monitoring}
 
 A drone control system service can perform automatic drone monitoring and control. It watches the *master\_drone\_list.yaml* file for changes and executes them accordingly, monitors drones connection via Redis, restarting via SSH if they drop, and also obeys temporary changes to a drone status through a stop or start command that was manually initiated.
@@ -436,7 +438,11 @@ sudo systemctl enable drone@4.service
 
 You can start the drones now, or let the control computer start them after drone control is enabled on it. The available control commands for systemd services are: *start*, *stop*, *restart*, *status*. For example to start drone 1:
 
-sudo systemctl start drone@1.service
+sudo systemctl start [drone@1.service](mailto:drone@1.service)
+
+To monitor drone messages for drones that are running as system services, use the log file:
+
+tail \-f \~/primecam\_readout/logs/board.log
 
 # `primecam_readout` file structure {#primecam_readout-file-structure}
 
