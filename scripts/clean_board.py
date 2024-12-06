@@ -143,7 +143,7 @@ def cleanDroneDirs(**kwargs):
     See cleanDir(...) for argument descriptions.
     """
 
-    cleanDir("../src/drones/", ftype=".npy", **kwargs)
+    cleanDir("../drones/", ftype=".npy", **kwargs)
 
 
 
