@@ -251,7 +251,7 @@ def _isFileOlderThanDaysAgo(file_path, olderThanDaysAgo):
     time_difference = current_time - file_time
 
     # Check if the file is older than the specified days
-    isOlderThanDaysAgo = time_difference < delta
+    isOlderThanDaysAgo = time_difference > delta
 
     return isOlderThanDaysAgo
 
