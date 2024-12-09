@@ -775,7 +775,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'timestreamOn', 
             com_to   = params['com_to'],
-            com_args = f'on={params['on']},')
+            com_args = f"on={params['on']},")
         
         # return is a fail message str or number of clients int
         return True, f"timestreamOn: {rtn}"
