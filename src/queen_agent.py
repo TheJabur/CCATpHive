@@ -1,9 +1,9 @@
 # ============================================================================ #
 # queen_agent.py
-# OCS agent to main (queen) commands.
+# OCS agent to control computer (queen) commands.
 #
 # James Burgoyne jburgoyne@phas.ubc.ca 
-# CCAT Prime 2023  
+# CCAT Prime 2024
 # ============================================================================ #
 
 from ocs import ocs_agent, site_config
@@ -116,8 +116,7 @@ class ReadoutAgent:
             The value to set for key.
         """
         
-        return True, f"{params['key']}: {queen.setKeyValue(params['key'], 
-                                                           params['value'])}"
+        return True, f"{params['key']}: {queen.setKeyValue(params['key'], params['value'])}"
 
 
     # ======================================================================== #
