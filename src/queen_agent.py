@@ -803,7 +803,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'userPacketInfo', 
             com_to   = params['com_to'],
-            com_args = f'data={params['data']},')
+            com_args = f"data={params['data']}")
         
         # return is a fail message str or number of clients int
         return True, f"userPacketInfo: {rtn}"
