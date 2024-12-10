@@ -24,6 +24,11 @@ setNCLO_msg = queen_agent.setNCLO(com_to='1.1', f_lo=500)
 print(" Done.")
 print(f"setNCLO message: {setNCLO_msg}")
 
+print("Sending sys_info command...", end="")
+sys_info_msg = queen_agent.sys_info(com_to='1.1')
+print(" Done.")
+print(f"sys_info message: {sys_info_msg}")
+
 # print("Sending setFineNCLO command...", end="")
 # msg = queen_agent.setFineNCLO(com_to='1.1', df_lo=1)
 # print(" Done.")
