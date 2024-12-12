@@ -145,11 +145,20 @@ def connectRedis():
 def listenMode(r, p, chan_subs):
     p.psubscribe(chan_subs)             # channels to listen to
 
+    last_msg_id = ''
+
     for new_message in p.listen():      # infinite listening loop
         # print(new_message)
 
-        if new_message['type'] != 'pmessage': # not a command
-            continue                    # skip this message
+        # check this is a command
+        if new_message['type'] != 'pmessage':
+            continue
+
+        # check we haven't already processed this message
+        # e.g. could have come through on another channel
+        if new_message['id'] == last_msg_id:
+            continue
+        last_msg_id = new_message['id']
 
         chan_sub = new_message['channel'].decode('utf-8')
         # channel = new_message['channel'].decode('utf-8')
@@ -196,7 +205,7 @@ def publishResponse(resp, r, chan_str):
     '''
 
     chan = chans.comChan(chan=chan_str)
-    print(f" {chan.pubRet})
+    print(f" {chan.pubRet}")
 
     try: 
         ret = pickle.dumps(resp) # convert to bytes object; required by Redis
