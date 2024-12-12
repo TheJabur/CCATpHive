@@ -205,7 +205,7 @@ def publishResponse(resp, r, chan_str):
     '''
 
     chan = chans.comChan(chan=chan_str)
-    print(f" {chan.pubRet}")
+    # print(f" {chan.pubRet}")
 
     try: 
         ret = pickle.dumps(resp) # convert to bytes object; required by Redis
@@ -214,7 +214,8 @@ def publishResponse(resp, r, chan_str):
     except Exception as e:
         print(f' Publish response failed.')
     else:
-        print(f' Publish response successful.')
+        # print(f' Publish response successful.')
+        pass
 
 
 # ============================================================================ #
