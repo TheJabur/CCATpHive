@@ -20,12 +20,13 @@ import pickle
 from datetime import datetime
 # import tempfile
 import time
+import signal
 
 from config import queen as cfg
 from config import parentDir
 
 import queen_commands.control_io as io
-import redis_channels as rc
+import redis_channels as chans
 import queen_commands.test_functions as test
 import drone_control as drone_control
 
@@ -87,80 +88,199 @@ def comNumFromStr(com_str):
     return int(coms[com_str])
 
 
+# ============================================================================ #
+# _catchAllResponses
+def _catchAllResponses(p, num_clients, timeout=120):
+    """Listen for Redis responses, with a timeout.
+
+    p: Redis pubsub object that listens for responses.
+    num_clients (int): Number of responses to wait for.
+    timeout (int): Timeout in seconds.
+
+    Returns: (list) Collected responses.
+    Raises: TimeoutError: If listening times out.
+    """
+
+    resps = [] # return list
+
+    # nothing to listen for!
+    if num_clients <= 0:
+        return resps
+
+    # initialize timeout handler
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Listening timed out.")
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)
+
+    try:
+        for new_message in p.listen():
+
+            # only care about pmessages
+            if new_message['type'] != 'pmessage':
+                continue 
+
+            # process this return
+            resps.append(new_message)
+            _processCommandReturn(new_message['data'])  # print and save
+
+            # stop when all expected returns received
+            if len(resps) >= num_clients:
+                break
+
+    # stop listening and pass back on timeout
+    except TimeoutError as e:
+        pass # raise e
+    finally:
+        signal.alarm(0) # Disable the alarm
+
+    return resps
+
 
 # ============================================================================ #
 #  alcoveCommand
-def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
-    '''Send an alcove command to given board.
-    com_num: Command number.
-    bid: Board identifier.
-    drid: Drone identifier (1-4). Requires bid to be set.
-    all_boards: Send to all boards instead of bid/drid.
-    args: String command arguments.'''
+def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, timeout=120):
+    '''Send an alcove command to given board[s].
 
-    print(f"Connecting to Redis server... ", end="")
-    try:
-        r,p = _connectRedis()
-    except Exception as e: return _fail(e, f'Failed to connect to Redis server.')
-    else: _success("Connected to Redis server.")
+    com_num: (int) Command number.
+    bid: (int) Board identifier, optional.
+    drid: (int) Drone identifier (1-4), optional. Requires bid to be set.
+    all_boards: (bool) Send to all boards instead of bid/drid. Overrides bid.
+    args: (str) Command arguments.
+    timeout: (int) Timeout to wait for responses. [s]
+    
+    Return: 2-tuples (num_clients, ret_dict)
+        num_clients: (int) Number of clients that received the command.
+        ret_dict: (dict/None) Conglomerate return dictionary from all clients.
+    '''
 
-    payload = com_num if args is None else f"{com_num} {args}"
+    to_str = "all boards" if all_boards else f"{bid}.{drid}" if drid else f"board {bid}"
+    print(f"Attempting to send command ({com_num}) to {to_str} with args={args}.")
 
-    ## Send to all boards
-    if all_boards:
-        # don't listen for responses here
-        # let listening queen pick them up
+    ret = (0,{})  # default return
 
-        ## Publish command to all boards
-        print(f"Publishing command {com_num} to all boards... ", end="")
-        try:
-            num_clients = r.publish(rc.getAllBoardsChan(), payload)
-        except Exception as e: return _fail(e, f'Failed to publish command.')
-        else: _success("Published command.")
-
-        print(f"{num_clients} drones received this command.")
-        return num_clients
-
-    ## Send to a single board
-    elif bid:
-
-        # Generate unique command channel
-        com_chan = rc.comChan(bid, drid if drid is not None else 0)
-
-        # Publish command
-        print(f"Publishing command {com_num} to board {com_chan.id}... ", end="")
-        try:
-            p.psubscribe(com_chan.sub)                     # return channel
-            num_clients = r.publish(com_chan.pub, payload) # send command
-        except Exception as e: return _fail(e, f'Failed to publish command.')
-        else: _success("Published command.")
-
-        if num_clients == 0: # no one listening!
-            # This may mean the board has crashed
-            print(f"No client received this command!")
-            return 0
-
-        # Listen for a response
-        print(f"Listening for a response... ", end="")
-        for new_message in p.listen():              # listen for a return
-            if new_message['type'] != 'pmessage': continue # not correct message
-            _success("Response received.")
-
-            # add a timeout?
-
-            # Process response
-            print(f"Processing response... ", end="")
-            try:
-                _processCommandReturn(new_message['data'])
-            except Exception as e: return _fail(e, f'Failed to process response.')
-            else: _success("Processed response.")
-
-            # stop listening; we only expect a single response
-            return num_clients
-
-    # not clear who to send command to
-    else:
+    if not all_boards and not bid:
         print("Command not sent: bid required if not sending to all boards.")
+        return ret
+
+    # all_boards overrides bid and drid
+    if all_boards:
+        bid, drid = None, None
+
+    r,p = _connectRedis()
+
+    # build payload for drone[s]
+    payload = f'{com_num}' if args is None else f'{com_num} {args}'
+
+    # build Redis command channels
+    chan = chans.comChan(bid, drid)
+        
+    # subscribe for returns
+    p.psubscribe(chan.subRet)
+
+    # send the command
+    num_clients = r.publish(chan.pub, payload) # send command
+    if num_clients == 0:
+        print(f"No client received this command!")
+        return ret
+    print(f"{num_clients} drones received this command.")
+
+    # Listen for a responses
+    # if a command takes longer than timeout it won't catch response
+    print(f"Listening for responses... ", end="")
+    resps = _catchAllResponses(p, num_clients, timeout=timeout)
+    print(f"{len(resps)} received. Done.")
+
+    ret = (num_clients, resps)
+    return ret
+
+    # # Listen for a responses
+    # print(f"Listening for responses... ", end="")
+    # resps = []
+    # for new_message in p.listen():
+    #     if new_message['type'] == 'pmessage': 
+    #         resps.append()
+    #         # try:
+    #         _processCommandReturn(new_message['data']) # print and save
+
+    #     if len(resps) >= num_clients:
+    #         break
+
+    # print(f"{len(resps)} received. Done.")
+
+
+
+# def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
+#     '''Send an alcove command to given board.
+#     com_num: Command number.
+#     bid: Board identifier.
+#     drid: Drone identifier (1-4). Requires bid to be set.
+#     all_boards: Send to all boards instead of bid/drid.
+#     args: String command arguments.'''
+
+#     print(f"Connecting to Redis server... ", end="")
+#     try:
+#         r,p = _connectRedis()
+#     except Exception as e: return _fail(e, f'Failed to connect to Redis server.')
+#     else: _success("Connected to Redis server.")
+
+#     payload = com_num if args is None else f"{com_num} {args}"
+
+#     ## Send to all boards
+#     if all_boards:
+#         # don't listen for responses here
+#         # let listening queen pick them up
+
+#         ## Publish command to all boards
+#         print(f"Publishing command {com_num} to all boards... ", end="")
+#         try:
+#             num_clients = r.publish(rc.getAllBoardsChan(), payload)
+#         except Exception as e: return _fail(e, f'Failed to publish command.')
+#         else: _success("Published command.")
+
+#         print(f"{num_clients} drones received this command.")
+#         return num_clients
+
+#     ## Send to a single board
+#     elif bid:
+
+#         # Generate unique command channel
+#         com_chan = rc.comChan(bid, drid if drid is not None else 0)
+
+#         # Publish command
+#         print(f"Publishing command {com_num} to board {com_chan.id}... ", end="")
+#         try:
+#             p.psubscribe(com_chan.sub)                     # return channel
+#             num_clients = r.publish(com_chan.pub, payload) # send command
+#         except Exception as e: return _fail(e, f'Failed to publish command.')
+#         else: _success("Published command.")
+
+#         if num_clients == 0: # no one listening!
+#             # This may mean the board has crashed
+#             print(f"No client received this command!")
+#             return 0
+
+#         # Listen for a response
+#         print(f"Listening for a response... ", end="")
+#         for new_message in p.listen():              # listen for a return
+#             if new_message['type'] != 'pmessage': continue # not correct message
+#             _success("Response received.")
+
+#             # add a timeout?
+
+#             # Process response
+#             print(f"Processing response... ", end="")
+#             try:
+#                 _processCommandReturn(new_message['data'])
+#             except Exception as e: return _fail(e, f'Failed to process response.')
+#             else: _success("Processed response.")
+
+#             # stop listening; we only expect a single response
+#             return num_clients
+
+#     # not clear who to send command to
+#     else:
+#         print("Command not sent: bid required if not sending to all boards.")
 
 
 # ============================================================================ #
@@ -251,9 +371,10 @@ def monitorMode():
 
 # ============================================================================ #
 #  listenMode
+"""
 def listenMode():
-    """Listen for Redis messages (threaded).
-    """
+    '''Listen for Redis messages (threaded).
+    '''
     # CTRL-C to exit listening mode
 
     r,p = _connectRedis()
@@ -283,6 +404,7 @@ def listenMode():
     # This thread isn't shut down - could lead to problems
     # thread.stop()
     return thread
+"""
 
 
 # ============================================================================ #
@@ -376,15 +498,15 @@ def print(*args, **kw):
 
 # ============================================================================ #
 #  _success/_fail
-def _success(msg):
-    print("Done.")
-    if msg is not None: logging.info(msg)
+# def _success(msg):
+#     print("Done.")
+#     if msg is not None: logging.info(msg)
 
-def _fail(e, msg=None):
-    print("Failed.")
-    if msg is not None: logging.info(msg)
-    logging.error(e)
-    return e
+# def _fail(e, msg=None):
+#     print("Failed.")
+#     if msg is not None: logging.info(msg)
+#     logging.error(e)
+#     return e
 
 
 # ============================================================================ #

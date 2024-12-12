@@ -22,7 +22,7 @@ import pickle
 import argparse
 
 from config import board as cfg
-import redis_channels as rc
+import redis_channels as chans
 
 
 
@@ -50,8 +50,8 @@ def main():
     r.client_setname(f'drone_{cfg.bid}.{cfg.drid}')
 
     print(f"Drone {cfg.bid}.{cfg.drid} is running...")
-    sub_chan_list = rc.getThisChanList()
-    listenMode(r, p, sub_chan_list)
+
+    listenMode(r, p, chans.subList())
             
 
 
@@ -191,35 +191,21 @@ def executeCommand(com_num, args, kwargs):
 
 # ============================================================================ #
 # publishResponse
-def publishResponse(resp, r, chan_sub):
+def publishResponse(resp, r, chan_str):
+    '''Publish a response on return channel.
+    '''
 
-    chan_pub = rc.getReturnChan(chan_sub)
-    print(chan_pub)
+    chan = chans.comChan(chan=chan_str)
+    print(chan.pubRet)
 
-    # print(f"Preparing response... ", end="")
-    try: #####
-        ret = pickle.dumps(resp)        # pickle serializes to bytes obj.
-        # this is needed because redis pubsub only allows bytes objects
+    try: 
+        ret = pickle.dumps(resp) # convert to bytes object; required by Redis
+        r.publish(chan.pubRet, ret) # publish resp with Redis on return channel
+
     except Exception as e:
         print(f'Publish response failed.')
-        # _print("Failed.")
-        # logging.info(f'Publish response failed.')
-        return                          # exit: need ret to send
-    else:
-        pass
-        # _print("Done.")
-
-    # print(f"Sending response... ", end="")
-    try: #####
-        r.publish(chan_pub, ret)       # publish with redis
-    except Exception as e:
-        print(f'Publish response failed.')
-        # _print("Failed.")
-        # logging.info(f'Publish response failed.')
     else:
         print(f'Publish response successful.')
-        # _print(f"Done.")
-        # logging.info(f'Publish response successful.')
 
 
 # ============================================================================ #
