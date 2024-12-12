@@ -148,27 +148,33 @@ def _processCommand(args):
         print(f"Queen command {args.com_num}... ", flush=True)
         ret = queen.callCom(
             args.com_num, args=args.arguments, bid=bid, drid=drid)
+        print(f"Done. ret={ret[1]}")
 
-    # specific board/drone command
-    elif args.bid:
-        print(f"Sending board {args.bid} command {args.com_num}... ", flush=True)
-        if drid:
+    # drone command
+    else:
+
+        # targeted drone
+        if args.bid and args.drid:
+            print(f"Sending drone {args.bid}.{args.drid} \
+                  command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, drid=drid, args=args.arguments)
-        else:
+            
+        # targeted board
+        elif args.bid:
+            print(f"Sending board {args.bid} \
+                  command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, args=args.arguments)
 
-    # all-boards commands
-    else:
-        print(f"Processing all boards command {args.com_num}... ", flush=True)
-        ret = queen.alcoveCommand(
-            args.com_num, all_boards=True, args=args.arguments)
-    
-    try:
+        # all drones
+        else:
+            print(f"Processing all boards \
+                  command {args.com_num}... ", flush=True)
+            ret = queen.alcoveCommand(
+                args.com_num, all_boards=True, args=args.arguments)
+            
         print(f"Done. {ret[0]} drones received. {len(ret[1])} responses.")
-    except:
-        print(f"Done. ret={ret}")
 
 
 
