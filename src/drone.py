@@ -71,10 +71,11 @@ def print(*args, **kw):
 
     # add drone id
     if cfg.bid and cfg.drid:
-        msg += f"drone={cfg.bid}.{cfg.drid}: "
+        # msg += f"drone={cfg.bid}.{cfg.drid}: "
+        msg += f"{cfg.bid}.{cfg.drid}: "
 
     # add current filename
-    msg += f"{os.path.basename(__file__)}: "
+    # msg += f"{os.path.basename(__file__)}: "
 
     # add print strings
     msg += " ".join(map(str, args))
@@ -180,7 +181,7 @@ def listenMode(r, p, chan_subs):
 # ============================================================================ #
 # executeCommand
 def executeCommand(com_num, args, chan_str, kwargs):
-    print(f"Executing command {com_num} (channel: {chan_str})")
+    print(f"Exe com {com_num} (chan: {chan_str} args={args})")
     try: #####
         ret = alcove.callCom(com_num, args, kwargs)   # execute the command
 
