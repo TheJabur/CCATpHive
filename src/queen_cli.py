@@ -155,22 +155,22 @@ def _processCommand(args):
 
         # targeted drone
         if bid and drid:
-            print(f"Sending drone {bid}.{drid} \
-                  command {args.com_num}... ", flush=True)
+            print(f"Sending drone {bid}.{drid} " \
+                  f"command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, drid=drid, args=args.arguments)
             
         # targeted board
         elif bid:
-            print(f"Sending board {bid} \
-                  command {args.com_num}... ", flush=True)
+            print(f"Sending board {bid} " \
+                  f"command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, args=args.arguments)
 
         # all drones
         else:
-            print(f"Processing all boards \
-                  command {args.com_num}... ", flush=True)
+            print(f"Processing all boards " \
+                  f"command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, all_boards=True, args=args.arguments)
             
