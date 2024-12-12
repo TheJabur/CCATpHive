@@ -164,8 +164,11 @@ def _processCommand(args):
         print(f"Processing all boards command {args.com_num}... ", flush=True)
         ret = queen.alcoveCommand(
             args.com_num, all_boards=True, args=args.arguments)
-        
-    print(f"Done. {ret[0]} drones received. {len(ret[1])} responses.")
+    
+    try:
+        print(f"Done. {ret[0]} drones received. {len(ret[1])} responses.")
+    except:
+        print(f"Done. ret={ret}")
 
 
 
