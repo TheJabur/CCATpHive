@@ -177,13 +177,13 @@ def executeCommand(com_num, args, kwargs):
 
     except Exception as e:              # command execution failed
         ret = f"Command execution error: {e}"
-        print(f"Command {com_num} execution failed.")
+        print(f" Command {com_num} execution failed.")
         # logging.info('Command {com_num} execution failed.') # logging now in print
 
     else:                               # command execution successful
         if ret is None:                 # default return is None (success)
             ret = f"Command {com_num} executed." # success ack.
-        print(f"Command {com_num} execution done.")
+        print(f" Command {com_num} execution done.")
         # logging.info(f'Command {com_num} execution successful.')
 
     return ret
@@ -196,16 +196,16 @@ def publishResponse(resp, r, chan_str):
     '''
 
     chan = chans.comChan(chan=chan_str)
-    print(chan.pubRet)
+    print(f" {chan.pubRet})
 
     try: 
         ret = pickle.dumps(resp) # convert to bytes object; required by Redis
         r.publish(chan.pubRet, ret) # publish resp with Redis on return channel
 
     except Exception as e:
-        print(f'Publish response failed.')
+        print(f' Publish response failed.')
     else:
-        print(f'Publish response successful.')
+        print(f' Publish response successful.')
 
 
 # ============================================================================ #
