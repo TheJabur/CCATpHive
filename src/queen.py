@@ -49,7 +49,7 @@ logging.basicConfig(
 def _com():
     return {
         1:alcoveCommand,
-        2:listenMode,
+        # 2:listenMode,
         3:getKeyValue,
         4:setKeyValue,
         5:getClientList,
