@@ -157,7 +157,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, tim
     to_str = "all boards" if all_boards else f"{bid}.{drid}" if drid else f"board {bid}"
     print(f"Attempting to send command ({com_num}) to {to_str} with args={args}.")
 
-    ret = (0,{})  # default return
+    ret = (0,[])  # default return
 
     if not all_boards and not bid:
         print("Command not sent: bid required if not sending to all boards.")
@@ -194,94 +194,6 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, tim
     ret = (num_clients, resps)
     return ret
 
-    # # Listen for a responses
-    # print(f"Listening for responses... ", end="")
-    # resps = []
-    # for new_message in p.listen():
-    #     if new_message['type'] == 'pmessage': 
-    #         resps.append()
-    #         # try:
-    #         _processCommandReturn(new_message['data']) # print and save
-
-    #     if len(resps) >= num_clients:
-    #         break
-
-    # print(f"{len(resps)} received. Done.")
-
-
-
-# def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
-#     '''Send an alcove command to given board.
-#     com_num: Command number.
-#     bid: Board identifier.
-#     drid: Drone identifier (1-4). Requires bid to be set.
-#     all_boards: Send to all boards instead of bid/drid.
-#     args: String command arguments.'''
-
-#     print(f"Connecting to Redis server... ", end="")
-#     try:
-#         r,p = _connectRedis()
-#     except Exception as e: return _fail(e, f'Failed to connect to Redis server.')
-#     else: _success("Connected to Redis server.")
-
-#     payload = com_num if args is None else f"{com_num} {args}"
-
-#     ## Send to all boards
-#     if all_boards:
-#         # don't listen for responses here
-#         # let listening queen pick them up
-
-#         ## Publish command to all boards
-#         print(f"Publishing command {com_num} to all boards... ", end="")
-#         try:
-#             num_clients = r.publish(rc.getAllBoardsChan(), payload)
-#         except Exception as e: return _fail(e, f'Failed to publish command.')
-#         else: _success("Published command.")
-
-#         print(f"{num_clients} drones received this command.")
-#         return num_clients
-
-#     ## Send to a single board
-#     elif bid:
-
-#         # Generate unique command channel
-#         com_chan = rc.comChan(bid, drid if drid is not None else 0)
-
-#         # Publish command
-#         print(f"Publishing command {com_num} to board {com_chan.id}... ", end="")
-#         try:
-#             p.psubscribe(com_chan.sub)                     # return channel
-#             num_clients = r.publish(com_chan.pub, payload) # send command
-#         except Exception as e: return _fail(e, f'Failed to publish command.')
-#         else: _success("Published command.")
-
-#         if num_clients == 0: # no one listening!
-#             # This may mean the board has crashed
-#             print(f"No client received this command!")
-#             return 0
-
-#         # Listen for a response
-#         print(f"Listening for a response... ", end="")
-#         for new_message in p.listen():              # listen for a return
-#             if new_message['type'] != 'pmessage': continue # not correct message
-#             _success("Response received.")
-
-#             # add a timeout?
-
-#             # Process response
-#             print(f"Processing response... ", end="")
-#             try:
-#                 _processCommandReturn(new_message['data'])
-#             except Exception as e: return _fail(e, f'Failed to process response.')
-#             else: _success("Processed response.")
-
-#             # stop listening; we only expect a single response
-#             return num_clients
-
-#     # not clear who to send command to
-#     else:
-#         print("Command not sent: bid required if not sending to all boards.")
-
 
 # ============================================================================ #
 #  callCom
@@ -292,31 +204,24 @@ def callCom(com_num, args=None, bid=None, drid=None):
     args: (str) arguments for command (see payloadToCom).
     '''
 
-    if com_num not in com:               # invalid command
+    ret = (0,[]) # default return
+
+    # invalid command
+    if com_num not in com:
         print('Invalid command: '+str(com_num))
-        return
+        return ret
 
-    ## build payload
-    # payload consists of commmand number and arguments
-    if args is None:
-        payload = str(com_num)
-    else:
-        payload = f"{com_num} {args}"
-        
-    try:
-        com_num, args, kwargs = payloadToCom(payload) # split payload into command
-        for k,v in {'bid':bid, 'drid':drid}.items(): # add bid drid to kwargs
-            if v: kwargs[k] = v
-        ret = com[com_num](*args, **kwargs)
-    except BaseException as e: 
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        ret = message
+    # convert string args to standard arg/kwargs list/dict
+    args, kwargs = _strToArgsAndKwargs(args)
 
-    # supressing this as some commands are called on timer
-    # if ret is not None: # default success return is None
-        # print(f"{com[com_num].__name__}: {ret}") # monkeypatched to log
+    # add bid/drid to kwargs
+    kwargs['bid'] = bid
+    kwargs['drid'] = drid
 
+    # execute queen command
+    resp = com[com_num](*args, **kwargs)
+
+    ret = (0,[resp]) # format like alcoveCommand return
     return ret
 
 
@@ -571,46 +476,39 @@ def _timeMsg():
 
 
 # ============================================================================ #
-#  listToArgsAndKwargs
-def listToArgsAndKwargs(args_list):
-    """Split an arg list into args and kwargs.
-    l: Args list to split.
-    Returns args (list) and kwargs (dictionary)."""
-    
-    args_str = ' '.join(args_list)
+#  _strToArgsAndKwargs
+def _strToArgsAndKwargs(args_str=''):
+    '''Convert string arguments to stanard args/kwargs list/dict.
+
+    args_str: (str) Arguments string, e.g. 'arg1=val1, arg2=val2'.
+    '''
+
+    # convert None to blank str
+    if not args_str:
+        args_str = ''
+
+    # cleanup string formatting (user inputted)
     args_str = args_str.replace(",", " ")
     args_str = args_str.replace("=", " = ")
     args_str = ' '.join(args_str.split()) # remove excess whitespace
     l = args_str.split()
     
+    # build args and kwargs
     args = []
     kwargs = {}
     while len(l)>0:
-        v = l.pop(0)
+        e = l.pop(0)
 
-        if len(l)>0 and l[0]=='=': # kwarg
+        # named kwarg
+        if len(l)>0 and l[0]=='=':
             l.pop(0) # get rid of =
-            kwargs[v] = l.pop(0)
+            kwargs[e] = l.pop(0)
 
-        else: # arg
-            args.append(v)
+        # positional arg
+        else: 
+            args.append(e)
 
     return args, kwargs
-
-
-# ============================================================================ #
-#  payloadToCom
-def payloadToCom(payload):
-    '''Convert payload to com_num, args, kwargs.
-    payload: Command string data.
-        Payload format: [com_num] [positional arguments] [named arguments].
-        Named arguments format: -[argument name] [value].'''
-    
-    paylist = payload.split()
-    com_num = int(paylist.pop(0)) # assuming first item is com_num
-    args, kwargs = listToArgsAndKwargs(paylist)
-    
-    return com_num, args, kwargs
 
 
 
