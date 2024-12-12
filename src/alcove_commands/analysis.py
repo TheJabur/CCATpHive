@@ -7,6 +7,9 @@
 
 from alcove_commands.alcove_base import *
 
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
+
 
 
 # ============================================================================ #
@@ -126,7 +129,7 @@ def _findResonators(f, Z,
     width       = (int(width_min), int(width_max))
 
     i_peaks = _resonatorIndicesInS21(
-        f, Z, cfg.sweep_steps, stitch_sw, f_hi, f_lo, prom_dB, 
+        f, Z, cfg_b.sweep_steps, stitch_sw, f_hi, f_lo, prom_dB, 
         distance, width, testing=False)
     f_res = f[i_peaks]
 
@@ -182,7 +185,7 @@ def _findResonators_alt(f, Z,
     
     # stitch discontinuities
     if stitch:
-        y = _stitchS21m(y, bw=cfg.sweep_steps, sw=stitch_sw)
+        y = _stitchS21m(y, bw=cfg_b.sweep_steps, sw=stitch_sw)
         
     # remove continuum
     if remove_cont:

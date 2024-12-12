@@ -7,6 +7,9 @@
 
 from alcove_commands.alcove_base import *
 
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
+
 
 # ============================================================================ #
 # _loadBinList
@@ -14,9 +17,9 @@ def _loadBinList(chan, freq_list):
 
     import numpy as np
 
-    fs = cfg.wf_fs # 512e6 
-    lut_len = cfg.wf_lut_len # 2**20
-    fft_len = cfg.wf_fft_len # 1024
+    fs = cfg_b.wf_fs # 512e6 
+    lut_len = cfg_b.wf_lut_len # 2**20
+    fft_len = cfg_b.wf_fft_len # 1024
     k = np.int64(np.round(-freq_list/(fs/lut_len)))
     freq_actual = k*(fs/lut_len)
     bin_list = np.int64(np.round(freq_actual / (fs / fft_len)))
@@ -241,7 +244,7 @@ def writeTestTone():
 
     import numpy as np
     
-    chan = cfg.drid # drone (chan) id is from config
+    chan = cfg_b.drid # drone (chan) id is from config
     freqs = np.array(np.linspace(50e6, 255.00e6, 1))
     amps = np.ones(1)*(2**15 - 1)
     phi=np.array([np.pi])
@@ -261,7 +264,7 @@ def writeNewVnaComb(freq_noise=5_000):
 
     freq_noise = float(freq_noise)
     
-    chan = cfg.drid # drone (chan) id is from config
+    chan = cfg_b.drid # drone (chan) id is from config
 
     freqs_bb = np.array(np.linspace(-254.4e6, 255.00e6, 1000))
     # freqs_bb += np.random.uniform(-freq_noise, freq_noise, len(freqs_bb))
@@ -295,7 +298,7 @@ def _writeTargComb(f_center, freqs_rf, amps=None, phis=None, cal_tones=False):
     if not isinstance(cal_tones, bool):
         cal_tones = cal_tones == "True" # force to bool; Redis args are strings
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     freqs_bb = freqs_rf - f_center
 
@@ -327,7 +330,7 @@ def writeTargCombFromVnaSweep(cal_tones=False):
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     f_center   = io.load(io.file.f_center_vna) # Hz
     freqs_rf = io.load(io.file.f_res_vna).real
@@ -362,7 +365,7 @@ def writeTargCombFromTargSweep(cal_tones=False, new_amps_and_phis=False):
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     f_center   = io.load(io.file.f_center_vna)
     freqs_rf = io.load(io.file.f_res_targ).real
@@ -399,7 +402,7 @@ def writeTargCombFromCustomList():
 
     return writeCombFromCustomList()
 
-    # chan = cfg.drid
+    # chan = cfg_b.drid
 
     # f_center   = io.load(io.file.f_center_vna)
     # freqs_rf = io.load(io.file.f_rf_tones_comb_cust)
@@ -427,7 +430,7 @@ def writeCombFromCustomList():
     alcove_commands/custom_phis.npy
     """
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     f_center   = io.load(io.file.f_center_vna)
     freqs_rf = io.load(io.file.f_rf_tones_comb_cust)

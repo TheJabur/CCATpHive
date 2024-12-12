@@ -7,6 +7,10 @@
 
 from alcove_commands.alcove_base import *
 
+try: from config import board as cfg_b
+except ImportError: cfg_b = None 
+
+
 
 # ============================================================================ #
 # _toneFreqsAndAmpsFromSweepData
@@ -118,12 +122,12 @@ def vnaSweep():
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     f_center = io.load(io.file.f_center_vna)
     freqs_bb = io.load(io.file.freqs_vna)
 
-    S21 = np.array(_sweep(chan, f_center/1e6, freqs_bb,cfg.sweep_steps, N_accums=cfg.sweep_accums)) # f, Z
+    S21 = np.array(_sweep(chan, f_center/1e6, freqs_bb,cfg_b.sweep_steps, N_accums=cfg_b.sweep_accums)) # f, Z
 
     io.save(io.file.s21_vna, S21)
     io.save(io.file.f_center_vna, f_center)
@@ -143,7 +147,7 @@ def vnaSweepFull(f_center, N_steps=500):
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
     f_center = int(f_center)
 
     setNCLO(f_center)
@@ -163,14 +167,14 @@ def targetSweep():
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
     
     f_center = io.load(io.file.f_center_vna) # Hz
     freqs_rf = io.load(io.file.f_res_targ)
     freqs_bb = freqs_rf - f_center
 
     S21 = np.array(_sweep(chan, f_center/1e6, freqs_bb, 
-                          cfg.sweep_steps, chan_bandwidth=cfg.target_chan_bw, N_accums=cfg.sweep_accums)) 
+                          cfg_b.sweep_steps, chan_bandwidth=cfg_b.target_chan_bw, N_accums=cfg_b.sweep_accums)) 
 
     io.save(io.file.s21_targ, S21)
 
@@ -185,7 +189,7 @@ def customSweep(bw=1.):
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     bw = float(bw)
     
@@ -194,8 +198,8 @@ def customSweep(bw=1.):
     freqs_bb = freqs_rf - f_center
 
     S21 = np.array(_sweep(
-        chan, f_center/1e6, freqs_bb, cfg.sweep_steps, 
-        chan_bandwidth=bw, N_accums=cfg.sweep_accums)) 
+        chan, f_center/1e6, freqs_bb, cfg_b.sweep_steps, 
+        chan_bandwidth=bw, N_accums=cfg_b.sweep_accums)) 
 
     return io.returnWrapper(io.file.s21_custom, S21)
 
@@ -219,7 +223,7 @@ def targetSweepFull(freqs=None, f_center=None, N_steps=500, chan_bandwidth=0.2, 
 
     import numpy as np
 
-    chan = cfg.drid
+    chan = cfg_b.drid
 
     # load resonator frequencies from vna sweep if not passed in
     if freqs is None:
@@ -292,7 +296,7 @@ def loChop(f_center=600, freq_offset=0.012, tol=0.01e6, dtol=0):
 
     import numpy as np
     
-    chan = cfg.drid
+    chan = cfg_b.drid
     freqs = io.load(io.file.f_res_targ)
     
     # if this comb is already set we could bypass this step for efficiency
