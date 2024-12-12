@@ -145,7 +145,7 @@ def connectRedis():
 def listenMode(r, p, chan_subs):
     p.psubscribe(chan_subs)             # channels to listen to
 
-    last_msg_id = ''
+    last_chan_str = ''
 
     for new_message in p.listen():      # infinite listening loop
         # print(new_message)
@@ -154,16 +154,15 @@ def listenMode(r, p, chan_subs):
         if new_message['type'] != 'pmessage':
             continue
 
+        # get channel string (unique to command)
+        chan_str = new_message['channel'].decode('utf-8')
+        # cid = chan_sub.split('_')[-1]    # recover cid from channel
+
         # check we haven't already processed this message
         # e.g. could have come through on another channel
-        # print(new_message.get('id'))
-        # if new_message['id'] == last_msg_id:
-        #     continue
-        # last_msg_id = new_message['id']
-
-        chan_sub = new_message['channel'].decode('utf-8')
-        # channel = new_message['channel'].decode('utf-8')
-        # cid = channel.split('_')[-1]    # recover cid from channel
+        if chan_str == last_chan_str:
+            continue
+        last_chan_str = chan_str
 
         payload = new_message['data'].decode('utf-8')
         try:
@@ -176,7 +175,7 @@ def listenMode(r, p, chan_subs):
             print(com_ret)
         
         # publishResponse(com_ret, r, bid, cid) # send response
-        publishResponse(com_ret, r, chan_sub) # send response
+        publishResponse(com_ret, r, chan_str) # send response
 
 
 # ============================================================================ #
