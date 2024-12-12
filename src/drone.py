@@ -167,6 +167,7 @@ def listenMode(r, p, chan_subs):
 
         payload = new_message['data'].decode('utf-8')
         try:
+            print(new_message.get('id'))
             com_num, args, kwargs = payloadToCom(payload) # split payload into command
             # print(com_num, args, kwargs)
             com_ret = executeCommand(com_num, args, kwargs) # attempt execution
