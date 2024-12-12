@@ -129,8 +129,8 @@ def _catchAllResponses(p, num_clients, timeout=120):
                 break
 
     # stop listening and pass back on timeout
-    except TimeoutError as e:
-        pass # raise e
+    except TimeoutError:
+        pass
     finally:
         signal.alarm(0) # Disable the alarm
 
