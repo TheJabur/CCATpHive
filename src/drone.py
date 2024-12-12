@@ -156,9 +156,9 @@ def listenMode(r, p, chan_subs):
 
         # check we haven't already processed this message
         # e.g. could have come through on another channel
-        if new_message['id'] == last_msg_id:
-            continue
-        last_msg_id = new_message['id']
+        # if new_message['id'] == last_msg_id:
+        #     continue
+        # last_msg_id = new_message['id']
 
         chan_sub = new_message['channel'].decode('utf-8')
         # channel = new_message['channel'].decode('utf-8')
