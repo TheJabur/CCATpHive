@@ -156,7 +156,7 @@ def listenMode(r, p, chan_subs):
 
         # check we haven't already processed this message
         # e.g. could have come through on another channel
-        print(new_message.get('id'))
+        # print(new_message.get('id'))
         # if new_message['id'] == last_msg_id:
         #     continue
         # last_msg_id = new_message['id']
