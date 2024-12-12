@@ -101,7 +101,7 @@ def _subChan(bid=None, drid=None, cid=None, ret=False, wildcard=True):
     chan = f'{_pubChan(bid, drid, cid, ret)}'
 
     if wildcard:
-        chan = f'{chan}*'
+        chan = f'{chan}_*'
 
     return chan
 
