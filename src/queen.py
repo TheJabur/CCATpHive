@@ -214,9 +214,11 @@ def callCom(com_num, args=None, bid=None, drid=None):
     # convert string args to standard arg/kwargs list/dict
     args, kwargs = _strToArgsAndKwargs(args)
 
-    # add bid/drid to kwargs
-    kwargs['bid'] = bid
-    kwargs['drid'] = drid
+    # add bid/drid to kwargs if present
+    if bid: 
+        kwargs['bid'] = bid
+    if bid and drid: 
+        kwargs['drid'] = drid
 
     # execute queen command
     resp = com[com_num](*args, **kwargs)
