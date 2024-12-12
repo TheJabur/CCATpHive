@@ -91,7 +91,7 @@ def _setupArgparse():
         type=str, help="Arguments to send with command, e.g. 'bar' or '-foo bar' or 'baz -foo bar'."\
         " Note: Avoid subargs starting with '-a' or '-q' due to known bug.")
 
-    parser.add_argument("bid", nargs='?',
+    parser.add_argument("id", nargs='?',
         type=str, help="Board and drone id: format is 'bid' or 'bid.drid'.")
     parser.add_argument("-q", "--queen",
         action="store_true", help="Queen command instead of board command.")
@@ -141,7 +141,7 @@ def _processCommand(args):
     Look at _setupArgparse() for arguments setup.
     """
 
-    bid, drid = _bid_drid(args.bid) if args.bid else (None, None)
+    bid, drid = _bid_drid(args.id) if args.id else (None, None)
 
     # queen command
     if args.queen:
@@ -154,15 +154,15 @@ def _processCommand(args):
     else:
 
         # targeted drone
-        if args.bid and args.drid:
-            print(f"Sending drone {args.bid}.{args.drid} \
+        if bid and drid:
+            print(f"Sending drone {bid}.{drid} \
                   command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, drid=drid, args=args.arguments)
             
         # targeted board
-        elif args.bid:
-            print(f"Sending board {args.bid} \
+        elif bid:
+            print(f"Sending board {bid} \
                   command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(
                 args.com_num, bid=bid, args=args.arguments)
