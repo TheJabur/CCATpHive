@@ -51,7 +51,7 @@ def main():
 
     print(f"Drone {cfg.bid}.{cfg.drid} is running...")
 
-    listenMode(r, p, chans.subList())
+    listenMode(r, p, chans.subList(cfg.bid, cfg.drid))
             
 
 
