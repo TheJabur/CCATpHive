@@ -174,7 +174,10 @@ def _processCommand(args):
             ret = queen.alcoveCommand(
                 args.com_num, all_boards=True, args=args.arguments)
             
-        print(f"Done. {ret[0]} drones received. {len(ret[1])} responses.")
+        if ret[0] <= 0:
+            print(f"WARNING: No drones received this command.")
+        else:
+            print(f"Done. {ret[0]} drones received. {len(ret[1])} responses.")
 
 
 
