@@ -168,7 +168,7 @@ def listenMode(r, p, chan_subs):
         try:
             com_num, args, kwargs = payloadToCom(payload) # split payload into command
             # print(com_num, args, kwargs)
-            com_ret = executeCommand(com_num, args, kwargs) # attempt execution
+            com_ret = executeCommand(com_num, args, chan_str, kwargs) # attempt execution
         except Exception as e:
             com_ret = f"Payload error ({payload}): {e}"
             print(com_ret)
@@ -179,8 +179,8 @@ def listenMode(r, p, chan_subs):
 
 # ============================================================================ #
 # executeCommand
-def executeCommand(com_num, args, kwargs):
-    print(f"Executing command: {com_num}... ")
+def executeCommand(com_num, args, chan_str, kwargs):
+    print(f"Executing command {com_num} (channel: {chan_str})")
     try: #####
         ret = alcove.callCom(com_num, args, kwargs)   # execute the command
 
@@ -192,7 +192,7 @@ def executeCommand(com_num, args, kwargs):
     else:                               # command execution successful
         if ret is None:                 # default return is None (success)
             ret = f"Command {com_num} executed." # success ack.
-        print(f" Command {com_num} execution done.")
+        # print(f" Command {com_num} execution done.")
         # logging.info(f'Command {com_num} execution successful.')
 
     return ret
