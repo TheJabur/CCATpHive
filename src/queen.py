@@ -49,7 +49,6 @@ logging.basicConfig(
 def _com():
     return {
         1:alcoveCommand,
-        # 2:listenMode,
         3:getKeyValue,
         4:setKeyValue,
         5:getClientList,
@@ -89,57 +88,8 @@ def comNumFromStr(com_str):
 
 
 # ============================================================================ #
-# _catchAllResponses
-def _catchAllResponses(p, num_clients, timeout=120):
-    """Listen for Redis responses, with a timeout.
-
-    p: Redis pubsub object that listens for responses.
-    num_clients (int): Number of responses to wait for.
-    timeout (int): Timeout in seconds.
-
-    Returns: (list) Collected responses.
-    Raises: TimeoutError: If listening times out.
-    """
-
-    resps = [] # return list
-
-    # nothing to listen for!
-    if num_clients <= 0:
-        return resps
-
-    # initialize timeout handler
-    def timeout_handler(signum, frame):
-        raise TimeoutError("Listening timed out.")
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(timeout)
-
-    try:
-        for new_message in p.listen():
-
-            # only care about pmessages
-            if new_message['type'] != 'pmessage':
-                continue 
-
-            # process this return
-            resps.append(new_message)
-            _processCommandReturn(new_message['data'])  # print and save
-
-            # stop when all expected returns received
-            if len(resps) >= num_clients:
-                break
-
-    # stop listening and pass back on timeout
-    except TimeoutError:
-        pass
-    finally:
-        signal.alarm(0) # Disable the alarm
-
-    return resps
-
-
-# ============================================================================ #
 #  alcoveCommand
-def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, timeout=120):
+def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     '''Send an alcove command to given board[s].
 
     com_num: (int) Command number.
@@ -147,7 +97,6 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, tim
     drid: (int) Drone identifier (1-4), optional. Requires bid to be set.
     all_boards: (bool) Send to all boards instead of bid/drid. Overrides bid.
     args: (str) Command arguments.
-    timeout: (int) Timeout to wait for responses. [s]
     
     Return: 2-tuples (num_clients, ret_dict)
         num_clients: (int) Number of clients that received the command.
@@ -188,7 +137,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None, tim
     # Listen for a responses
     # if a command takes longer than timeout it won't catch response
     print(f"Listening for responses... ", end="")
-    resps = _catchAllResponses(p, num_clients, timeout=timeout)
+    resps = _catchAllResponses(p, num_clients)
     print(f"{len(resps)} received. Done.")
 
     ret = (num_clients, resps)
@@ -274,44 +223,6 @@ def monitorMode():
     while True:
         monitorAction(r)
         time.sleep(cfg.monitor_interval) 
-
-
-# ============================================================================ #
-#  listenMode
-"""
-def listenMode():
-    '''Listen for Redis messages (threaded).
-    '''
-    # CTRL-C to exit listening mode
-
-    r,p = _connectRedis()
-
-    def handleMessage(message):
-        '''actions to take on receiving message'''
-        if message['type'] == 'pmessage':
-            # print(message['data'].decode('utf-8')) # log/print message
-            # _notificationHandler(message)  # send important notifications
-            print(f"{_timeMsg()} Message received on channel: {message['channel']}")
-            try:
-                _processCommandReturn(message['data'])
-            except Exception as e: 
-                return _fail(e, f'Failed to process a response.')
-            
-    # Message received: {'type': 'pmessage', 'pattern': b'rets_*', 'channel': b'rets_board_1.1_f9af519c-bea0-4093-81cf-8f8a423dc549', 'data': b'\x80 ...
-
-    rets_chan = rc.getAllReturnsChan()
-    p.psubscribe(**{rets_chan:handleMessage})
-    thread = p.run_in_thread(sleep_time=2) # move listening to thread
-        # sleep_time is a socket timeout
-         # too low and it will bog down server
-         # can be set to None but may cause issues
-         # more research is recommended
-    print('The Queen is listening...') 
-
-    # This thread isn't shut down - could lead to problems
-    # thread.stop()
-    return thread
-"""
 
 
 # ============================================================================ #
@@ -404,19 +315,6 @@ def print(*args, **kw):
 
 
 # ============================================================================ #
-#  _success/_fail
-# def _success(msg):
-#     print("Done.")
-#     if msg is not None: logging.info(msg)
-
-# def _fail(e, msg=None):
-#     print("Failed.")
-#     if msg is not None: logging.info(msg)
-#     logging.error(e)
-#     return e
-
-
-# ============================================================================ #
 #  _connectRedis
 def _connectRedis():
     '''connect to redis server'''
@@ -452,6 +350,45 @@ def _processCommandReturn(dat):
 
 
 # ============================================================================ #
+# _catchAllResponses
+def _catchAllResponses(p, num_clients):
+    """Listen for Redis responses, with a timeout.
+
+    p: Redis pubsub object that listens for responses.
+    num_clients (int): Number of responses to wait for.
+    timeout (int): Timeout in seconds.
+
+    Returns: (list) Collected responses.
+    Raises: TimeoutError: If listening times out.
+    """
+
+    resps = [] # return list
+
+    # nothing to listen for!
+    if num_clients <= 0:
+        return resps
+
+    # listen for new messages in subscribed channels
+    # there is no timeout logic 
+    # so this will not stop until all replies are received
+    for new_message in p.listen():
+
+        # only care about pmessages
+        if new_message['type'] != 'pmessage':
+            continue 
+
+        # process this return
+        resps.append(new_message)
+        _processCommandReturn(new_message['data'])  # print and save
+
+        # stop when all expected returns received
+        if len(resps) >= num_clients:
+            break
+
+    return resps
+
+
+# ============================================================================ #
 #  _notificationHandler
 def _notificationHandler(message):
     '''process given messages for sending notifications to end-users'''
@@ -461,20 +398,6 @@ def _notificationHandler(message):
      # look through given message[s?]
      # and look through configured notifications
      # and send emails as appropriate
-
-
-# ============================================================================ #
-#  _timeMsg
-def _timeMsg():
-    """A clear and concise time string for print statements."""
-
-    fmt = "%H:%M:%S_%y%m%d"
-
-    time_now = datetime.now()
-    time_str = time_now.strftime(fmt)
-    # ms_str = f".{time_now.microsecond // 1000:03}"
-    
-    return time_str
 
 
 # ============================================================================ #
