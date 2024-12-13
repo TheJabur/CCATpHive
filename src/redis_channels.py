@@ -26,15 +26,14 @@ def _id(bid, drid):
 
     bid: (int) Board identifier.
     drid: (int) Drone identifier {1,4}.
+
+    Return: (str) id e.g. '1' or '1.1'
     '''
 
-    id = None
-    if bid:
-        id = f'{bid}'        # e.g. '1'
-        if drid:
-            id += f'.{drid}' # e.g. '1.1'
+    if not bid:
+        return None
 
-    return id
+    return f"{bid}{f'.{drid}' if drid else ''}"
 
 
 # ============================================================================ #
@@ -43,17 +42,14 @@ def _bidDrid(id):
     '''Recover the bid and drid from the id.
 
     id: (str) bid.drid identifier.
+
+    Return: (2tuple of str) (bid,drid) e.g. ('1',None) or ('1','1')
     '''
 
-    bid = None
-    drid = None
     if id:
-        words = str(id).split('.')
-        bid = words[0]
-        if len(words) > 1:
-            drid = words[1]
-
-    return bid, drid
+        bid, *drid = str(id).split('.', 1)
+        return bid, drid[0] if drid else None
+    return None, None
 
 
 # ============================================================================ #
