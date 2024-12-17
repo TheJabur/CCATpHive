@@ -169,6 +169,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .setNCLO
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('f_lo', type=int)
     def setNCLO(self, session, params):
         """setNCLO()
@@ -188,6 +189,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'setNCLO', 
             com_to   = params['com_to'], 
+            silent   = params['silent'],
             com_args = f'f_lo={params["f_lo"]}')
         
         # return is a fail message str or number of clients int
@@ -197,6 +199,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .setFineNCLO
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('df_lo', type=float)
     def setFineNCLO(self, session, params):
         """setFineNCLO()
@@ -216,6 +219,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'setFineNCLO', 
             com_to   = params['com_to'], 
+            silent   = params['silent'],
             com_args = f'f_lo={params["df_lo"]}')
         
         # return is a fail message str or number of clients int
@@ -225,6 +229,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .getSnapData
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('mux_sel', type=int)
     def getSnapData(self, session, params):
         """getSnapData()
@@ -244,6 +249,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'getSnapData', 
             com_to   = params['com_to'], 
+            silent   = params['silent'],
             com_args = f'mux_sel={params["mux_sel"]}')
         
         # return is a fail message str or number of clients int
@@ -253,6 +259,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .getADCrms
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def getADCrms(self, session, params):
         """getADCrms()
 
@@ -261,7 +268,8 @@ class ReadoutAgent:
 
         rtn = _sendAlcoveCommand(
             com_str  = 'getADCrms', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"getADCrms: {rtn}"
@@ -270,6 +278,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeTestTone
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def writeTestTone(self, session, params):
         """writeTestTone()
 
@@ -285,7 +294,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'writeTestTone', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"writeTestTone: {rtn}"
@@ -294,6 +304,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeNewVnaComb
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def writeNewVnaComb(self, session, params):
         """writeNewVnaComb()
 
@@ -309,7 +320,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'writeNewVnaComb', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"writeNewVnaComb: {rtn}"
@@ -318,6 +330,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeTargCombFromVnaSweep
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('cal_tones', default=False, type=bool)
     def writeTargCombFromVnaSweep(self, session, params):
         """writeTargCombFromVnaSweep()
@@ -338,6 +351,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'writeTargCombFromVnaSweep', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'cal_tones={params["cal_tones"]}')
         
         # return is a fail message str or number of clients int
@@ -347,6 +361,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeTargCombFromTargSweep
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('cal_tones', default=False, type=bool)
     @ocs_agent.param('new_amps_and_phis', default=False, type=bool)
     def writeTargCombFromTargSweep(self, session, params):
@@ -371,6 +386,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'writeTargCombFromTargSweep', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'cal_tones={params["cal_tones"]}, new_amps_and_phis={params["cal_tones"]}')
         
         # return is a fail message str or number of clients int
@@ -380,6 +396,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeCombFromCustomList
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def writeCombFromCustomList(self, session, params):
         """writeCombFromCustomList()
 
@@ -398,7 +415,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'writeCombFromCustomList', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"writeCombFromCustomList: {rtn}"
@@ -407,6 +425,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .createCustomCombFilesFromCurrentComb
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def createCustomCombFilesFromCurrentComb(self, session, params):
         """createCustomCombFilesFromCurrentComb()
 
@@ -422,7 +441,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'createCustomCombFilesFromCurrentComb', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"createCustomCombFilesFromCurrentComb: {rtn}"
@@ -431,6 +451,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .modifyCustomCombAmps
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('factor', default=1, type=float)
     def modifyCustomCombAmps(self, session, params):
         """modifyCustomCombAmps()
@@ -450,6 +471,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'modifyCustomCombAmps', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'factor={params["factor"]}')
         
         # return is a fail message str or number of clients int
@@ -459,6 +481,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .writeTargCombFromCustomList
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def writeTargCombFromCustomList(self, session, params):
         """writeTargCombFromCustomList()
 
@@ -477,7 +500,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'writeTargCombFromCustomList', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"writeTargCombFromCustomList: {rtn}"
@@ -486,6 +510,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .vnaSweep
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def vnaSweep(self, session, params):
         """vnaSweep()
 
@@ -501,7 +526,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'vnaSweep', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"vnaSweep: {rtn}"
@@ -510,6 +536,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .targetSweep
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def targetSweep(self, session, params):
         """targetSweep()
 
@@ -525,7 +552,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'targetSweep', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"targetSweep: {rtn}"
@@ -534,6 +562,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .customSweep
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('bw', default=None, type=float)
     def customSweep(self, session, params):
         """customSweep()
@@ -554,11 +583,13 @@ class ReadoutAgent:
             rtn = _sendAlcoveCommand(
                 com_str  = 'customSweep', 
                 com_to   = params['com_to'],
+                silent   = params['silent'],
                 com_args = f'bw={params["bw"]}')
         else: # allow func bw default
             rtn = _sendAlcoveCommand(
                 com_str  = 'customSweep', 
-                com_to   = params['com_to'])
+                com_to   = params['com_to'],
+                silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"customSweep: {rtn}"
@@ -567,6 +598,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .findVnaResonators
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('peak_prom_std', default=10, type=float)
     @ocs_agent.param('peak_prom_db', default=0, type=float)
     @ocs_agent.param('peak_dis', default=100, type=int)
@@ -632,6 +664,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'findVnaResonators', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = com_args)
         
         # return is a fail message str or number of clients int
@@ -641,6 +674,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .findTargResonators
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('stitch_bw', default=500, type=int)
     def findTargResonators(self, session, params):
         """findTargResonators()
@@ -662,6 +696,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'findTargResonators', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'stitch_bw={params["stitch_bw"]}')
         
         # return is a fail message str or number of clients int
@@ -671,6 +706,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .findCalTones
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('f_lo', default=0.1, type=float)
     @ocs_agent.param('f_hi', default=50, type=float)
     @ocs_agent.param('tol', default=2, type=float)
@@ -699,6 +735,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'findCalTones', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'f_hi={params["f_hi"]}, f_lo={params["f_lo"]}, tol={params["tol"]}, max_tones={params["max_tones"]}')
         
         # return is a fail message str or number of clients int
@@ -708,6 +745,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .sys_info
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def sys_info(self, session, params):
         """sys_info()
 
@@ -723,7 +761,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'sys_info', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"sys_info: {rtn}"
@@ -732,6 +771,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .sys_info_v
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     def sys_info_v(self, session, params):
         """sys_info_v()
 
@@ -747,7 +787,8 @@ class ReadoutAgent:
   
         rtn = _sendAlcoveCommand(
             com_str  = 'sys_info_v', 
-            com_to   = params['com_to'])
+            com_to   = params['com_to'],
+            silent   = params['silent'])
         
         # return is a fail message str or number of clients int
         return True, f"sys_info_v: {rtn}"
@@ -756,6 +797,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .timestreamOn
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('on', default=True, type=bool)
     def timestreamOn(self, session, params):
         """timestreamOn()
@@ -775,6 +817,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'timestreamOn', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f"on={params['on']},")
         
         # return is a fail message str or number of clients int
@@ -784,6 +827,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .userPacketInfo
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('data', type=int)
     def userPacketInfo(self, session, params):
         """userPacketInfo()
@@ -803,6 +847,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'userPacketInfo', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f"data={params['data']}")
         
         # return is a fail message str or number of clients int
@@ -812,6 +857,7 @@ class ReadoutAgent:
     # ======================================================================== #
     # .setAtten
     @ocs_agent.param('com_to', default=None, type=str)
+    @ocs_agent.param('silent', default=False, type=bool)
     @ocs_agent.param('direction', type=str)
     @ocs_agent.param('atten', type=float)
     def setAtten(self, session, params):
@@ -837,6 +883,7 @@ class ReadoutAgent:
         rtn = _sendAlcoveCommand(
             com_str  = 'setAtten', 
             com_to   = params['com_to'],
+            silent   = params['silent'],
             com_args = f'direction={direction}, atten={atten},')
         
         # return is a fail message str or number of clients int
@@ -864,7 +911,7 @@ def _comNumAlcove(com_str):
 
 # ============================================================================ #
 # _sendAlcoveCommand
-def _sendAlcoveCommand(com_str, com_to, com_args=None):
+def _sendAlcoveCommand(com_str, com_to, com_args=None, silent=False):
     """Send Alcove command.
 
     com_str:    (str)   String name of command. 
@@ -874,11 +921,13 @@ def _sendAlcoveCommand(com_str, com_to, com_args=None):
                         E.g. '1.1' is board 1, drone 1.
     com_args:   (str)   Command arguments.
                         E.g. 'f_lo=500'
+    ret_data:   (bool)  Whether the board should return data or be silent.
     """
 
     print(com_str, com_to, com_args)
 
     com_num = _comNumAlcove(com_str)
+    ret_data = not silent
 
     print(com_num)
 
@@ -888,13 +937,18 @@ def _sendAlcoveCommand(com_str, com_to, com_args=None):
         bid = int(ids[0]) # must exist
         drid = int(ids[1]) if len(ids)>1 else None
         if drid:
-            return queen.alcoveCommand(com_num, bid=bid, drid=drid, args=com_args)
+            return queen.alcoveCommand(
+                com_num, bid=bid, drid=drid, args=com_args, ret_data=ret_data)
         else:
-            return queen.alcoveCommand(com_num, bid=bid, args=com_args)
+            return queen.alcoveCommand(
+                com_num, bid=bid, args=com_args, ret_data=ret_data)
+
+# ret = queen.alcoveCommand(args.com_num, bid=bid, drid=drid, args=args.arguments, ret_data=ret_data)
 
     # all-boards commands
     else:
-        return queen.alcoveCommand(com_num, all_boards=True, args=com_args)
+        return queen.alcoveCommand(
+            com_num, all_boards=True, args=com_args, ret_data=ret_data)
     
 
 
