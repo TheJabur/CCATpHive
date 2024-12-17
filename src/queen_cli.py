@@ -96,6 +96,9 @@ def _setupArgparse():
     parser.add_argument("-q", "--queen",
         action="store_true", help="Queen command instead of board command.")
 
+    parser.add_argument("-s", "--silent", 
+        action="store_true", help="Silent command: minimal return.")
+
     # bid or -q or neither, but not both
     # g1 = parser.add_mutually_exclusive_group(required=False)
     # g1.add_argument("bid", nargs='?',
@@ -142,6 +145,7 @@ def _processCommand(args):
     """
 
     bid, drid = _bid_drid(args.id) if args.id else (None, None)
+    ret_data = not args.silent
 
     # queen command
     if args.queen:
@@ -157,22 +161,22 @@ def _processCommand(args):
         if bid and drid:
             print(f"Sending drone {bid}.{drid} " \
                   f"command {args.com_num}... ", flush=True)
-            ret = queen.alcoveCommand(
-                args.com_num, bid=bid, drid=drid, args=args.arguments)
+            ret = queen.alcoveCommand(args.com_num, 
+                bid=bid, drid=drid, args=args.arguments)
             
         # targeted board
         elif bid:
             print(f"Sending board {bid} " \
                   f"command {args.com_num}... ", flush=True)
-            ret = queen.alcoveCommand(
-                args.com_num, bid=bid, args=args.arguments)
+            ret = queen.alcoveCommand(args.com_num, 
+                bid=bid, args=args.arguments, ret_data=ret_data)
 
         # all drones
         else:
             print(f"Processing all boards " \
                   f"command {args.com_num}... ", flush=True)
-            ret = queen.alcoveCommand(
-                args.com_num, all_boards=True, args=args.arguments)
+            ret = queen.alcoveCommand(args.com_num, 
+                all_boards=True, args=args.arguments, ret_data=ret_data)
             
         if ret[0] <= 0:
             print(f"WARNING: No drones received this command.")
