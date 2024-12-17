@@ -162,7 +162,7 @@ def _processCommand(args):
             print(f"Sending drone {bid}.{drid} " \
                   f"command {args.com_num}... ", flush=True)
             ret = queen.alcoveCommand(args.com_num, 
-                bid=bid, drid=drid, args=args.arguments)
+                bid=bid, drid=drid, args=args.arguments, ret_data=ret_data)
             
         # targeted board
         elif bid:
