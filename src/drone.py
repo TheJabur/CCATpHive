@@ -167,9 +167,9 @@ def listenMode(r, p, chan_subs):
 
         payload = new_message['data'].decode('utf-8')
         try:
-            com_num, args, kwargs = payloadToCom(payload) # split payload into command
+            com_num, ret_data, args, kwargs = payloadToCom(payload)
             # print(com_num, args, kwargs)
-            com_ret = executeCommand(com_num, args, chan_str, kwargs) # attempt execution
+            com_ret = executeCommand(com_num, ret_data, args, chan_str, kwargs)
         except Exception as e:
             com_ret = f"Payload error ({payload}): {e}"
             print(com_ret)
@@ -180,7 +180,11 @@ def listenMode(r, p, chan_subs):
 
 # ============================================================================ #
 # executeCommand
-def executeCommand(com_num, args, chan_str, kwargs):
+def executeCommand(com_num, ret_data, args, chan_str, kwargs):
+    '''
+    ret_data: (bool) Whether to return data from command func.
+    '''
+
     print(f"Exe com {com_num} (chan: {chan_str} args={args})")
     try: #####
         ret = alcove.callCom(com_num, args, kwargs)   # execute the command
@@ -191,7 +195,8 @@ def executeCommand(com_num, args, chan_str, kwargs):
         # logging.info('Command {com_num} execution failed.') # logging now in print
 
     else:                               # command execution successful
-        if ret is None:                 # default return is None (success)
+
+        if ret is None or ret_data:                 # default return is None (success)
             ret = f"Command {com_num} executed." # success ack.
         # print(f" Command {com_num} execution done.")
         # logging.info(f'Command {com_num} execution successful.')
@@ -259,9 +264,10 @@ def payloadToCom(payload):
     
     paylist = payload.split()
     com_num = int(paylist.pop(0)) # assuming first item is com_num
+    ret_data = int(paylist.pop(0)) # assuming second item is ret_data
     args, kwargs = listToArgsAndKwargs(paylist)
     
-    return com_num, args, kwargs
+    return com_num, ret_data, args, kwargs
 
 
 # ============================================================================ #

@@ -89,7 +89,8 @@ def comNumFromStr(com_str):
 
 # ============================================================================ #
 #  alcoveCommand
-def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
+def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, 
+                  args=None, ret_data=True):
     '''Send an alcove command to given board[s].
 
     com_num: (int) Command number.
@@ -97,6 +98,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     drid: (int) Drone identifier (1-4), optional. Requires bid to be set.
     all_boards: (bool) Send to all boards instead of bid/drid. Overrides bid.
     args: (str) Command arguments.
+    ret_data: (bool) Whether the board should return data or be silent.
     
     Return: 2-tuples (num_clients, ret_dict)
         num_clients: (int) Number of clients that received the command.
@@ -106,11 +108,9 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     to_str = "all boards" if all_boards else f"{bid}.{drid}" if drid else f"board {bid}"
     print(f"Attempting to send command ({com_num}) to {to_str} with args={args}.")
 
-    ret = (0,[])  # default return
-
     if not all_boards and not bid:
         print("Command not sent: bid required if not sending to all boards.")
-        return ret
+        return (0,[])
 
     # all_boards overrides bid and drid
     if all_boards:
@@ -119,7 +119,9 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     r,p = _connectRedis()
 
     # build payload for drone[s]
-    payload = f'{com_num}' if args is None else f'{com_num} {args}'
+    payload = f'{com_num} {int(ret_data)}' # ret_data: bool->int->str
+    payload += '' if args is None else f'{args}'
+    # payload = f'{com_num}' if args is None else f'{com_num} {args}'
 
     # build Redis command channels
     chan = chans.comChan(bid, drid)
@@ -131,7 +133,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     num_clients = r.publish(chan.pub, payload) # send command
     if num_clients == 0:
         print(f"No client received this command!")
-        return ret
+        return (0,[])
     print(f"{num_clients} drones received this command.")
 
     # Listen for a responses
@@ -140,8 +142,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False, args=None):
     resps = _catchAllResponses(p, num_clients)
     print(f"{len(resps)} received. Done.")
 
-    ret = (num_clients, resps)
-    return ret
+    return (num_clients, resps)
 
 
 # ============================================================================ #
