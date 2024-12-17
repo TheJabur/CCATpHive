@@ -186,20 +186,21 @@ def executeCommand(com_num, ret_data, args, chan_str, kwargs):
     '''
 
     print(f"Exe com {com_num} (chan: {chan_str} args={args})")
-    try: #####
-        ret = alcove.callCom(com_num, args, kwargs)   # execute the command
 
-    except Exception as e:              # command execution failed
+    # execute the command
+    try:
+        ret = alcove.callCom(com_num, args, kwargs)
+
+    # command execution failed
+    except Exception as e:
         ret = f"Command execution error: {e}"
         print(f" Command {com_num} execution failed.")
-        # logging.info('Command {com_num} execution failed.') # logging now in print
 
-    else:                               # command execution successful
-
-        if ret is None or ret_data:                 # default return is None (success)
+    # command execution successful
+    else:
+        if ret is None or not ret_data:
             ret = f"Command {com_num} executed." # success ack.
         # print(f" Command {com_num} execution done.")
-        # logging.info(f'Command {com_num} execution successful.')
 
     return ret
 
