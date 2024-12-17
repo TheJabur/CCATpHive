@@ -25,7 +25,7 @@ print(" Done.")
 print(f"setNCLO message: {setNCLO_msg}")
 
 print("Sending sys_info command...", end="")
-sys_info_msg = queen_agent.sys_info(com_to='1.1')
+sys_info_msg = queen_agent.sys_info(com_to='1.1', silent=True)
 print(" Done.")
 print(f"sys_info message: {sys_info_msg}")
 
