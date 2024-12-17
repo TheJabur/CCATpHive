@@ -120,7 +120,7 @@ def alcoveCommand(com_num, bid=None, drid=None, all_boards=False,
 
     # build payload for drone[s]
     payload = f'{com_num} {int(ret_data)}' # ret_data: bool->int->str
-    payload += '' if args is None else f'{args}'
+    payload += '' if args is None else f' {args}'
     # payload = f'{com_num}' if args is None else f'{com_num} {args}'
 
     # build Redis command channels
