@@ -1,4 +1,4 @@
-# *primecam\_readout*
+`primecam_readout`
 
 # Prime-Cam Readout Software Documentation
 
@@ -218,8 +218,8 @@ sudo nano /etc/redis/redis.conf
 
 Change the following parameters. Make sure you update the primecam\_readout configuration files for both the RFSoC board and the control computer with these settings.
 
-- *bind 192.168.1.100*  
-- *requirepass your\_strong\_password*  
+- *bind \[your Redis server IP address\]*  
+- *requirepass \[your Redis password\]*  
 - *tcp-keepalive 15*
 
 Start the Redis server.
@@ -447,7 +447,6 @@ tail \-f \~/primecam\_readout/logs/board.log
 # `primecam_readout` file structure {#primecam_readout-file-structure}
 
 **.github/:** Github directory.  
-**assets/:** GUI assets.  
 **cfg/:** Configuration information.  
 **\_cfg\_board.bak.py:** The RFSoC board configuration options example file. Copy and customize to \_cfg\_board.py.  
 **\_cfg\_queen.bak.py:** The control computer configuration options example file. Copy and customize to \_cfg\_queen.py.  
@@ -497,7 +496,6 @@ tail \-f \~/primecam\_readout/logs/board.log
 **pcs\_client\_test.py:** PCS agent testing and examples.  
 **queen\_agent.py:** PCS agent.  
 **queen\_cli.py:** Command line interface to queen.py.  
-**queen\_gui.py:** Graphical interface to queen.py. Experimental.  
 **queen.py:** Runs on the command server to publish commands (via Redis) to remote boards, and to listen for messages from the boards.  
 **quickDataViewer.ipynb:** A simple Jupyter notebook to inspect data in tmp/ (which are payloads from the board functions).  
 **redis\_channels.py:** Information and functions on the Redis channels used by the queen and drones.  
@@ -547,7 +545,6 @@ queen.py also contains functionality not directly exposed by the current interfa
 | :---- | :---- | :---- |
 | **Number** | **Name** | **Short description** |
 | 1 | alcoveCommand | Directly send command to board\[s\]. This is primarily for API access and shouldn’t be necessary for normal usage. |
-| 2 | listenMode | Continuously run and listen for boards return data.  2 \-*q* |
 | 3 | getKeyValue | Get a key-value. Primarily used for status flags.  *3 \-q \-a ‘key=\[key\]’* |
 | 4 | setKeyValue | Set a key-value.  *4 \-q \-a ‘key=\[key\] value=\[value\]’* |
 | 5 | getClientList | List of every client connected to Redis. This includes all clients on the controller computer as well as the boards. This client list returns the entire parameter set from Redis CLIENT\_LIST.  *5 \-q* |
@@ -605,7 +602,7 @@ A range of command numbers is reserved for testing functions. The current softwa
 
 ### Start a drone manually {#start-a-drone-manually}
 
-Each drone (up to 4\) on every board needs a separate running instance. These should be started automatically if the system services are setup. To start one manually, on the board:
+Each drone (up to 4\) on every board needs a separate running instance. These should be started automatically if the system services are setup. They can be started/stopped etc. using systemctl. The python script can also be run directly on the board:
 
 python drone.py \[drid\]
 
