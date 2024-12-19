@@ -182,7 +182,10 @@ Prime-Cam operates on Cerro Chajnantor in an ambient-coupled controlled internal
 
 ### Docker {#docker}
 
-Prime-Cam control software (PCS) uses Docker to manage and contain all the various software components. The architecture of `primecam_readout` has been designed to be compatible with a Docker install. Having a Docker image simplifies some aspects of the control computer setup, but increases complexity in others. At present, there is no publicly available Docker image for primecam\_readout, and instead images are built as needed, however the machinery to do so is all included in the project repo. If you are familiar with building Docker images then this should be straightforward to use, but outlining the process is beyond the scope of this document.
+Prime-Cam control software (PCS) uses Docker to manage and contain all the various software components. The architecture of `primecam_readout` has been designed to be compatible with a Docker install. At present, there is no publicly available Docker image for `primecam_readout`, and instead images are built as needed, and the machinery to do so is included in the project repo. If you are familiar with building Docker images then this should be straightforward to use.
+
+In order for `primecam_readout` to run in a Docker container, the PCS Docker environment must be running. This can be setup locally following the following documentation:  
+[https://pcs.readthedocs.io/en/latest/](https://pcs.readthedocs.io/en/latest/)
 
 ### Software setup {#software-setup}
 
@@ -316,10 +319,6 @@ The control computer and each of the boards has to be set up, as well as the con
 
 ## `primecam_readout` control computer installation {#primecam_readout-control-computer-installation}
 
-### `primecam_readout` control computer Docker installation {#primecam_readout-control-computer-docker-installation}
-
-`primecam_readout` includes machinery for Docker image creation. We do not provide images as of the time of writing of this document, so installation instructions are not covered here.
-
 ### `primecam_readout` control computer git installation {#primecam_readout-control-computer-git-installation}
 
 After the software environment is set up on the control computer, install `primecam_readout`.
@@ -370,6 +369,25 @@ sudo systemctl enable queen\_monitor.service
 You can check that it is running properly: 
 
 sudo systemctl status queen\_monitor.service
+
+### `primecam_readout` control computer Docker installation {#primecam_readout-control-computer-docker-installation}
+
+`primecam_readout` includes machinery for Docker image creation in order to run as a PCS Agent. It relies on the PCS Docker systems being accessible, which is covered in the software environment section. To build the Docker image on the control computer:
+
+cd \~/primecam\_readout  
+sudo docker build \-t queen\_agent .
+
+Then it can be brought up:
+
+sudo docker-compose up \-d
+
+The status of running Docker containers can be found:
+
+sudo docker ps
+
+If the container crashed, e.g. due to a bug etc., use the following:
+
+sudo docker ps \--filter "status=exited"
 
 ## `primecam_readout` RFSoC board installation {#primecam_readout-rfsoc-board-installation}
 
