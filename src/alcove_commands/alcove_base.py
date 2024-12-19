@@ -29,7 +29,7 @@ except ImportError: Overlay = None
 # FIRMWARE UPLOAD
 try:
     firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
-    firmware = Overlay(firmware_file, ignore_version=True, download=False)
+    # firmware = Overlay(firmware_file, ignore_version=True, download=False)
 except Exception as e: 
     firmware = None
     
@@ -153,10 +153,10 @@ def userPacketInfo(data):
     #count = 1*2**18
     dronenum = (chan-1)*2**16 # drone number minus 1
     # setup value , info or count, and drone number
-    udp_control.write(0x08, info + dronenum + value)
+    udp_control.write(0x08, info + dronenum + data)
     # strobe write enable
-    udp_control.write(0x08, we + info + dronenum + value)
-    udp_control.write(0x08, info + dronenum + value)
+    udp_control.write(0x08, we + info + dronenum + data)
+    udp_control.write(0x08, info + dronenum + data)
 
 # ============================================================================ #
 # writeChannelCount 
