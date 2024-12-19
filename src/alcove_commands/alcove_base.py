@@ -29,7 +29,7 @@ except ImportError: Overlay = None
 # FIRMWARE UPLOAD
 try:
     firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
-    # firmware = Overlay(firmware_file, ignore_version=True, download=False)
+    firmware = Overlay(firmware_file, ignore_version=True, download=False)
 except Exception as e: 
     firmware = None
     
