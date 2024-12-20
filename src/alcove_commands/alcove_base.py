@@ -23,28 +23,6 @@ except ImportError: cfg_b = None
 try: import xrfdc # type: ignore
 except ImportError: xrfdc = None
 
-# try: from pynq import Overlay # type: ignore
-# except ImportError: Overlay = None
-
-# # FIRMWARE UPLOAD
-# try:
-#     os.environ["TMPDIR"] = cfg_b.temp_dir
-
-#     with open(cfg_b.temp_dir+'/test.txt', "w") as f: f.write(cfg_b.temp_dir)
-
-#     firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
-#     firmware = Overlay(firmware_file, ignore_version=True, download=False)
-# except Exception as e: 
-#     firmware = None
-
-
-# import os
-# from pynq import Overlay
-
-# os.environ["TMPDIR"] = f"/tmp/drone_{os.getpid()}"
-# firmware = Overlay(firmware_file, ignore_version=True, download=False)
-
-    
 
 
 
