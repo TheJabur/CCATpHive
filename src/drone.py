@@ -53,6 +53,9 @@ def main():
     # setup a drone sepcific dir in /tmp
     _setupTmpDir()
 
+    # load firmware to config
+    _loadFirmware()
+
     # connect to Redis server and establish connection objects
     r,p = connectRedis()
     r.client_setname(f'drone_{cfg_b.bid}.{cfg_b.drid}')
@@ -153,6 +156,24 @@ def _setupTmpDir():
 
     # Set the TMPDIR environment variable
     os.environ["TMPDIR"] = d
+
+
+# ============================================================================ #
+# _loadFirmware
+def _loadFirmware():
+
+    try:
+        from pynq import Overlay # type: ignore
+
+        # os.environ["TMPDIR"] = cfg_b.temp_dir
+
+        with open(cfg_b.temp_dir+'/test.txt', "w") as f: f.write(cfg_b.temp_dir)
+
+        firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
+        cfg_b.firmware = Overlay(firmware_file, ignore_version=True, download=False)
+
+    except Exception as e: 
+        firmware = None
 
 
 # ============================================================================ #

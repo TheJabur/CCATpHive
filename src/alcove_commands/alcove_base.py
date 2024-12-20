@@ -23,19 +23,19 @@ except ImportError: cfg_b = None
 try: import xrfdc # type: ignore
 except ImportError: xrfdc = None
 
-try: from pynq import Overlay # type: ignore
-except ImportError: Overlay = None
+# try: from pynq import Overlay # type: ignore
+# except ImportError: Overlay = None
 
-# FIRMWARE UPLOAD
-try:
-    os.environ["TMPDIR"] = cfg_b.temp_dir
+# # FIRMWARE UPLOAD
+# try:
+#     os.environ["TMPDIR"] = cfg_b.temp_dir
 
-    with open(cfg_b.temp_dir+'/test.txt', "w") as f: f.write(cfg_b.temp_dir)
+#     with open(cfg_b.temp_dir+'/test.txt', "w") as f: f.write(cfg_b.temp_dir)
 
-    firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
-    firmware = Overlay(firmware_file, ignore_version=True, download=False)
-except Exception as e: 
-    firmware = None
+#     firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
+#     firmware = Overlay(firmware_file, ignore_version=True, download=False)
+# except Exception as e: 
+#     firmware = None
 
 
 # import os
@@ -86,7 +86,7 @@ def timestreamOn(on=True):
     # input parameter casting
     on = str(on) in {True, 1, '1', 'True', 'true'}
 
-    udp_control = firmware.gpio_udp_info_control
+    udp_control = cfg_b.firmware.gpio_udp_info_control
     
     # current drone channel
     chan = cfg_b.drid
@@ -130,7 +130,7 @@ def userPacket(data):
     data = 0 if data is None else data # fails to 0
     data = data & 0xFF # ensure data is 8 bits
 
-    udp_control = firmware.gpio_udp_info_control
+    udp_control = cfg_b.firmware.gpio_udp_info_control
     
     # current drone channel
     chan = cfg_b.drid
@@ -159,7 +159,7 @@ def userPacketInfo(data):
     # 16 bit data
     # current drone channel
     chan = cfg_b.drid
-    udp_control = firmware.gpio_udp_info_control
+    udp_control = cfg_b.firmware.gpio_udp_info_control
     we = 2**19
     info = 0*2**18
     #count = 1*2**18
@@ -176,7 +176,7 @@ def writeChannelCount(num_chans):
     # 16 bit value for number of active tones/channels in packet
     # current drone channel
     chan = cfg_b.drid
-    udp_control = firmware.gpio_udp_info_control
+    udp_control = cfg_b.firmware.gpio_udp_info_control
     we = 2**19
     #info = 0*2**18
     count = 1*2**18
@@ -226,20 +226,20 @@ def generateWaveDdr4(freq_list, amp_list, phi):
 def _getSnapData(chan, mux_sel, wrap=False):
 
     import numpy as np
-    from pynq import MMIO
+    from pynq import MMIO # type: ignore
 
     # WIDE BRAM
     if chan==1:
-        axi_wide = firmware.chan1.axi_wide_ctrl# 0x0 max count, 0x8 capture rising edge trigger
+        axi_wide = cfg_b.firmware.chan1.axi_wide_ctrl# 0x0 max count, 0x8 capture rising edge trigger
         base_addr_wide = 0x00_A007_0000
     elif chan==2:
-        axi_wide = firmware.chan2.axi_wide_ctrl
+        axi_wide = cfg_b.firmware.chan2.axi_wide_ctrl
         base_addr_wide = 0x00_B000_0000
     elif chan==3:
-        axi_wide = firmware.chan3.axi_wide_ctrl
+        axi_wide = cfg_b.firmware.chan3.axi_wide_ctrl
         base_addr_wide = 0x00_B000_8000
     elif chan==4:
-        axi_wide = firmware.chan4.axi_wide_ctrl
+        axi_wide = cfg_b.firmware.chan4.axi_wide_ctrl
         base_addr_wide = 0x00_8200_0000
     else:
         return "Does not compute"
@@ -336,7 +336,7 @@ def _setNCLO(chan, lofreq):
     # implemented in tones._writeComb and alcove_base._setNCLO
 
     # import xrfdc
-    rf_data_conv = firmware.usp_rf_data_converter_0
+    rf_data_conv = cfg_b.firmware.usp_rf_data_converter_0
     name = os.path.splitext(os.path.basename(cfg_b.firmware_file))[0]
     if int(name[7:9]) >= 13:
         tb_indices = {
@@ -356,7 +356,7 @@ def _setNCLO(chan, lofreq):
 
 def _getNCLO(chan):
 
-    rf_data_conv = firmware.usp_rf_data_converter_0
+    rf_data_conv = cfg_b.firmware.usp_rf_data_converter_0
 
     # adc tiles; adc blocks; dac tiles; dac blocks
     if chan == 1: 
@@ -416,7 +416,7 @@ def getNCLO(chan=None):
 # _setNCLO2
 def _setNCLO2(chan, lofreq):
     import numpy as np
-    mix = firmware.mix_freq_set_0
+    mix = cfg_b.firmware.mix_freq_set_0
     if chan == 1:
         offset = 0
     elif chan == 2:
