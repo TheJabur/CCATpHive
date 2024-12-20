@@ -28,10 +28,19 @@ except ImportError: Overlay = None
 
 # FIRMWARE UPLOAD
 try:
+    os.environ["TMPDIR"] = cfg_b.dir_tmp
     firmware_file = os.path.join(cfg_b.dir_root, cfg_b.firmware_file)
     firmware = Overlay(firmware_file, ignore_version=True, download=False)
 except Exception as e: 
     firmware = None
+
+
+# import os
+# from pynq import Overlay
+
+# os.environ["TMPDIR"] = f"/tmp/drone_{os.getpid()}"
+# firmware = Overlay(firmware_file, ignore_version=True, download=False)
+
     
 
 
