@@ -183,6 +183,9 @@ def genAmpsAndPhis(
             if ampPeak(freqs, amps, phis) < amp_max:
                 return amps, phis
 
+## Refactor this function to optimize search algorithm
+# Use a binary search algorithm
+
 
 # ============================================================================ #
 # genVariedAmpsAndPhis

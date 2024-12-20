@@ -19,15 +19,7 @@ except ImportError: cfg_q = None
 try: from config import board as cfg_b
 except ImportError: cfg_b = None  
 
-# try:
-#     # import xrfdc # type: ignore
-#     import xrfclk
-#     from pynq import Overlay
-#     firmware = Overlay(cfg_b.firmware_file, ignore_version=True)
-#     clksrc = 409.6 # MHz
-#     xrfclk.set_all_ref_clks(clksrc)
-# except Exception as e: 
-#     firmware = None
+
 
 
 # ============================================================================ #
