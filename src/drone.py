@@ -128,7 +128,7 @@ def _modifyConfig(args):
     cfg_b.drone_dir = f'{par_dir}/drones/drone{args.drid}'
 
     # tmp directory
-    cfg_b.dir_tmp = f'/tmp/drone{args.drid}'
+    cfg_b.temp_dir = f'/tmp/drone{args.drid}'
 
     # drone config
     sys.path.append(cfg_b.drone_dir)
@@ -141,14 +141,18 @@ def _modifyConfig(args):
 # ============================================================================ #
 # _setupTmpDir
 def _setupTmpDir():
+    '''Setup the system tmp directory to use.
+    '''
+
+    d = cfg_b.temp_dir
 
     # Ensure the custom directory is fresh
-    if os.path.exists(cfg_b.dir_tmp):
-        shutil.rmtree(cfg_b.dir_tmp)  # Delete the existing directory
-    os.makedirs(cfg_b.dir_tmp)        # Create a fresh directory
+    if os.path.exists(d):
+        shutil.rmtree(d)  # Delete the existing directory
+    os.makedirs(d)        # Create a fresh directory
 
     # Set the TMPDIR environment variable
-    os.environ["TMPDIR"] = cfg_b.dir_tmp
+    os.environ["TMPDIR"] = d
 
 
 # ============================================================================ #
