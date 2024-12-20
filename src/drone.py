@@ -12,16 +12,18 @@
 # ============================================================================ #
 
 
-import alcove
-import redis
 import os
 import sys
-import importlib
-import logging
+import redis
+import shutil
 import pickle
+import logging
 import argparse
+import importlib
 
-from config import board as cfg
+
+import alcove
+from config import board as cfg_b
 import redis_channels as chans
 
 
@@ -42,16 +44,24 @@ def main():
         format='{asctime} {levelname} {filename}:{lineno}: {message}'
     )
 
-    args = setupArgparse() # get command line arguments
+    # setup and get the CLI args
+    args = _setupArgparse() 
 
-    modifyConfig(args) # modify execution level configs
+    # modify the configs as necessary
+    _modifyConfig(args)
 
+    # setup a drone sepcific dir in /tmp
+    _setupTmpDir()
+
+    # connect to Redis server and establish connection objects
     r,p = connectRedis()
-    r.client_setname(f'drone_{cfg.bid}.{cfg.drid}')
+    r.client_setname(f'drone_{cfg_b.bid}.{cfg_b.drid}')
 
-    print(f"Drone {cfg.bid}.{cfg.drid} is running...")
+    print(f"Drone {cfg_b.bid}.{cfg_b.drid} is running...")
 
-    listenMode(r, p, chans.subList(cfg.bid, cfg.drid))
+    # run loop
+    listenMode(r, p, chans.subList(cfg_b.bid, cfg_b.drid))
+
             
 
 
@@ -70,9 +80,9 @@ def print(*args, **kw):
     msg = ""
 
     # add drone id
-    if cfg.bid and cfg.drid:
-        # msg += f"drone={cfg.bid}.{cfg.drid}: "
-        msg += f"{cfg.bid}.{cfg.drid}: "
+    if cfg_b.bid and cfg_b.drid:
+        # msg += f"drone={cfg_b.bid}.{cfg_b.drid}: "
+        msg += f"{cfg_b.bid}.{cfg_b.drid}: "
 
     # add current filename
     # msg += f"{os.path.basename(__file__)}: "
@@ -88,8 +98,8 @@ def print(*args, **kw):
 
 
 # ============================================================================ #
-# setupArgparse
-def setupArgparse():
+# _setupArgparse
+def _setupArgparse():
     '''Setup the argparse arguments'''
 
     parser = argparse.ArgumentParser(
@@ -104,32 +114,48 @@ def setupArgparse():
 
 
 # ============================================================================ #
-# modifyConfig
-def modifyConfig(args):
+# _modifyConfig
+def _modifyConfig(args):
     '''modify config level variables'''
 
-    ## project root directory (src)
-    cfg.src_dir = os.getcwd()          # assuming this file lives in root dir
+    # project root directory (src)
+    cfg_b.src_dir = os.getcwd()          # assuming this file lives in root dir
 
-    ## parent directory
+    # parent directory
     par_dir = os.path.realpath(os.path.pardir)
 
-    ## drone directory
-    cfg.drone_dir = f'{par_dir}/drones/drone{args.drid}'
+    # drone directory
+    cfg_b.drone_dir = f'{par_dir}/drones/drone{args.drid}'
 
-    ## drone config
-    sys.path.append(cfg.drone_dir)
+    # tmp directory
+    cfg_b.dir_tmp = f'/tmp/drone{args.drid}'
+
+    # drone config
+    sys.path.append(cfg_b.drone_dir)
     cfg_dr = importlib.import_module(f'_cfg_drone{args.drid}')
 
-    ## drone identifier
-    cfg.drid = cfg_dr.drid
+    # drone identifier
+    cfg_b.drid = cfg_dr.drid
+
+
+# ============================================================================ #
+# _setupTmpDir
+def _setupTmpDir():
+
+    # Ensure the custom directory is fresh
+    if os.path.exists(cfg_b.dir_tmp):
+        shutil.rmtree(cfg_b.dir_tmp)  # Delete the existing directory
+    os.makedirs(cfg_b.dir_tmp)        # Create a fresh directory
+
+    # Set the TMPDIR environment variable
+    os.environ["TMPDIR"] = cfg_b.dir_tmp
 
 
 # ============================================================================ #
 # connectRedis
 def connectRedis():
     '''connect to redis server'''
-    r = redis.Redis(host=cfg.host, port=cfg.port, db=cfg.db, password=cfg.pw)
+    r = redis.Redis(host=cfg_b.host, port=cfg_b.port, db=cfg_b.db, password=cfg_b.pw)
     p = r.pubsub()
 
     # check for connection
