@@ -89,81 +89,69 @@ def timestreamOn(on=True):
 
 
 # ============================================================================ #
-# userPacket
-def userPacket(data):
-    '''Write 8 bit data into the UDP timestream packet.
-    Each drone is given 8 bits of a 32 bit packet allocation.
+# userPacketInfo 
+def userPacketInfo(data):
+    '''Write 16 bits of data to include in the UDP timestream packet.
+    Data is drone specific.
 
-    data: 8 bit int to write.
+    data: 16 bit int to write.
         Note that Redis will convert user input to string.
         e.g. 255 can be sent as:
             '255', '255.0', '0xFF', '0b11111111', '0o377'
         If conversion fails, then will write 0 instead.
     '''
 
-    import time
-
     # input parameter casting
     data = safe_cast_to_int(data) # returns None if fails
     data = 0 if data is None else data # fails to 0
-    data = data & 0xFF # ensure data is 8 bits
+    data = data & 0xFFFF # ensure data is 16 bits
 
     udp_control = cfg_b.firmware.gpio_udp_info_control
-    
+
     # current drone channel
     chan = cfg_b.drid
 
-    # chan dependent delay instead of resource locking
-    delay_factor = 0.1 # in seconds
-    time.sleep(chan*delay_factor - delay_factor)
+    drone_shift = 16 # Shift for drone ID
+    edge_trigger = 19 # Shift for edge-triggered write
 
-    # Calculate the shift amount based on the channel 
-    # (chan 1 is the least significant byte)
-    shift_amount = (chan - 1) * 8
+    val = ((chan-1)<<drone_shift) | data
 
-    # get the current user data state
-    current_state = udp_control.read(0x08)
+    # Write to tmp reg then trigger write to final reg
+    udp_control.write(0x08, val)
+    udp_control.write(0x08, (1<<edge_trigger) | val)  # edge trigger
+    udp_control.write(0x08, val)
 
-    # determine the new state
-    mask = 0xFF << shift_amount
-    new_state = (current_state & ~mask) | (data << shift_amount)
-
-    # Write the data
-    udp_control.write(0x08, new_state)
-
-# ============================================================================ #
-# userPacketInfo 
-def userPacketInfo(data):
-    # 16 bit data
-    # current drone channel
-    chan = cfg_b.drid
-    udp_control = cfg_b.firmware.gpio_udp_info_control
-    we = 2**19
-    info = 0*2**18
-    #count = 1*2**18
-    dronenum = (chan-1)*2**16 # drone number minus 1
-    # setup value , info or count, and drone number
-    udp_control.write(0x08, info + dronenum + data)
-    # strobe write enable
-    udp_control.write(0x08, we + info + dronenum + data)
-    udp_control.write(0x08, info + dronenum + data)
 
 # ============================================================================ #
 # writeChannelCount 
 def writeChannelCount(num_chans):
-    # 16 bit value for number of active tones/channels in packet
+    '''Write the number of channels to include in the UDP timestream packet.
+    Drone specific.
+
+    num_chans: (int) 16 bits, number of channels.
+    '''
+
+    # input parameter casting
+    num_chans = safe_cast_to_int(num_chans) # returns None if fails
+    num_chans = 0 if num_chans is None else num_chans # fails to 0
+    num_chans = num_chans & 0xFFFF # ensure data is 16 bits
+
+    udp_control = cfg_b.firmware.gpio_udp_info_control
+
     # current drone channel
     chan = cfg_b.drid
-    udp_control = cfg_b.firmware.gpio_udp_info_control
-    we = 2**19
-    #info = 0*2**18
-    count = 1*2**18
-    dronenum = (chan-1)*2**16 # drone number minus 1
-    # setup value , info or count, and drone number
-    udp_control.write(0x08, count + dronenum + num_chans)
-    # strobe write enable
-    udp_control.write(0x08, we + count + dronenum + num_chans)
-    udp_control.write(0x08, count + dronenum + num_chans)
+
+    count_shift = 18 # Shift for count enable (as opposed to data)
+    drone_shift = 16 # Shift for drone ID
+    edge_trigger = 19 # Shift for edge-triggered write
+
+    val = (1<<count_shift) | ((chan-1)<<drone_shift) | num_chans
+
+    # Write to tmp reg then trigger write to final reg
+    udp_control.write(0x08, val)
+    udp_control.write(0x08, (1<<edge_trigger) | val)  # edge trigger
+    udp_control.write(0x08, val)
+
 
 # ============================================================================ #
 # generateWaveDdr4
