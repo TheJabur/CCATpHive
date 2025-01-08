@@ -41,12 +41,13 @@ except ImportError: xrfdc = None
 # safe_cast_to_int
 def safe_cast_to_int(data_str):
     try:
-        if data_str.lower().startswith('0x'):   # hex
-            return int(data_str, 16)
-        elif data_str.lower().startswith('0b'): # bin
-            return int(data_str, 2)
-        elif data_str.lower().startswith('0o'): # oct
-            return int(data_str, 8)
+        if isinstance(data_str, str):
+            if data_str.lower().startswith('0x'):   # hex
+                return int(data_str, 16)
+            elif data_str.lower().startswith('0b'): # bin
+                return int(data_str, 2)
+            elif data_str.lower().startswith('0o'): # oct
+                return int(data_str, 8)
         else:                                   # everything else
             return int(float(data_str)) # catches sci, underscores, etc.
     except (ValueError, SyntaxError) as e:
