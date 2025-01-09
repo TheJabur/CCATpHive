@@ -29,13 +29,13 @@ def _loadBinList(chan, freq_list):
     bin_list = np.abs(bin_list)
     # DSP REGS
     if chan == 1:
-        dsp_regs = firmware.chan1.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan1.dsp_regs_0
     elif chan == 2:
-        dsp_regs = firmware.chan2.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan2.dsp_regs_0
     elif chan == 3:
-        dsp_regs = firmware.chan3.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan3.dsp_regs_0
     elif chan == 4:
-        dsp_regs = firmware.chan4.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan4.dsp_regs_0
     else:
         return "Does not compute"
     # 0x00 -  fft_shift[9 downto 0], load_bins[22 downto 12], lut_counter_rst[11 downto 11] 
@@ -69,13 +69,13 @@ def _loadBinList(chan, freq_list):
 # _resetAccumAndSync
 def _resetAccumAndSync(chan, freqs):
     if chan == 1:
-        dsp_regs = firmware.chan1.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan1.dsp_regs_0
     elif chan == 2:
-        dsp_regs = firmware.chan2.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan2.dsp_regs_0
     elif chan == 3:
-        dsp_regs = firmware.chan3.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan3.dsp_regs_0
     elif chan == 4:
-        dsp_regs = firmware.chan4.dsp_regs_0
+        dsp_regs = cfg_b.firmware.chan4.dsp_regs_0
     else:
         return "Does not compute"
     # dsp_regs bitfield map
@@ -134,7 +134,7 @@ def _loadDdr4(chan, wave_real, wave_imag, dphi):
     data2 = ((np.int32(I2) << 16) + Q2).astype("int32")
     data3 = ((np.int32(I3) << 16) + Q3).astype("int32")
     # write waveform to DDR4 memory
-    ddr4mux = firmware.axi_ddr4_mux
+    ddr4mux = cfg_b.firmware.axi_ddr4_mux
     ddr4mux.write(8,0) # set read valid 
     ddr4mux.write(0,0) # mux switch
     base_addr_ddr4 = 0x4_0000_0000 #0x5_0000_0000
