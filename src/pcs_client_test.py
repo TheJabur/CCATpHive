@@ -14,14 +14,15 @@ print("Connecting to queenagent...", end="")
 queen_agent = OCSClient('queenagent', args=[])
 print(" Done.")
 
-def testFunc(func, msg1, msg2):
+def testFunc(func, msg1):
     print("")
     print(msg1, end="")
     rtn = func
     print(" Done.")
-    print(msg2, rtn)
+    print(rtn)
 
-testFunc(queen_agent.getClientList(), "Getting queen client list...", "Clients: ")
+testFunc(queen_agent.getClientList(), "Getting queen client list...")
+testFunc(queen_agent.setNCLO(com_to='1.1', f_lo=500), "Sending setNCLO command...")
 
 
 # print("")
