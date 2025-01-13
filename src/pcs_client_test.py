@@ -24,27 +24,9 @@ def testFunc(func, msg1):
 testFunc(queen_agent.getClientList(), "Getting queen client list...")
 testFunc(queen_agent.setNCLO(com_to='1.1', f_lo=500), "Sending setNCLO command...")
 testFunc(queen_agent.writeNewVnaComb(com_to='1.1'), "Sending writeNewVnaComb command...")
+testFunc(queen_agent.vnaSweep(com_to='1.1', N_steps=500), "Sending vnaSweep command...")
 
 
-
-# print("Sending writeNewVnaComb command...", end="")
-# msg = queen_agent.writeNewVnaComb(com_to='1.1')
-# print(" Done.")
-# print(f"writeNewVnaComb message: {msg}")
-
-
-
-# print("")
-# print("Getting queen client list...", end="")
-# clients = queen_agent.getClientList()
-# print(" Done.")
-# print("Clients: ", clients)
-
-# print("")
-# print("Sending setNCLO command...", end="")
-# setNCLO_msg = queen_agent.setNCLO(com_to='1.1', f_lo=500)
-# print(" Done.")
-# print(f"setNCLO message: {setNCLO_msg}")
 
 # print("")
 # print("Sending sys_info command...", end="")
@@ -57,14 +39,6 @@ testFunc(queen_agent.writeNewVnaComb(com_to='1.1'), "Sending writeNewVnaComb com
 # sys_info_msg = queen_agent.sys_info(com_to='1.1', silent=True)
 # print(" Done.")
 # print(f"sys_info message: {sys_info_msg}")
-
-# print("")
-# print("Sending writeNewVnaComb command...", end="")
-# msg = queen_agent.writeNewVnaComb(com_to='1.1')
-# print(" Done.")
-# print(f"writeNewVnaComb message: {msg}")
-
-
 
 # print("Sending setFineNCLO command...", end="")
 # msg = queen_agent.setFineNCLO(com_to='1.1', df_lo=1)
@@ -101,11 +75,6 @@ testFunc(queen_agent.writeNewVnaComb(com_to='1.1'), "Sending writeNewVnaComb com
 # msg = queen_agent.modifyCustomCombAmps(com_to='1.1', factor=1)
 # print(" Done.")
 # print(f"modifyCustomCombAmps message: {msg}")
-
-# print("Sending vnaSweep command...", end="")
-# msg = queen_agent.vnaSweep(com_to='1.1', N_steps=500)
-# print(" Done.")
-# print(f"vnaSweep message: {msg}")
 
 # print("Sending targetSweep command...", end="")
 # msg = queen_agent.targetSweep(com_to='1.1', N_steps=500, chan_bandwidth=0.2)
