@@ -23,6 +23,15 @@ def testFunc(func, msg1):
 
 testFunc(queen_agent.getClientList(), "Getting queen client list...")
 testFunc(queen_agent.setNCLO(com_to='1.1', f_lo=500), "Sending setNCLO command...")
+testFunc(queen_agent.writeNewVnaComb(com_to='1.1'), "Sending writeNewVnaComb command...")
+
+
+
+# print("Sending writeNewVnaComb command...", end="")
+# msg = queen_agent.writeNewVnaComb(com_to='1.1')
+# print(" Done.")
+# print(f"writeNewVnaComb message: {msg}")
+
 
 
 # print("")
