@@ -24,7 +24,7 @@ def testFunc(func, msg1):
 testFunc(queen_agent.getClientList(), "Getting queen client list...")
 testFunc(queen_agent.setNCLO(com_to='1.1', f_lo=500), "Sending setNCLO command...")
 testFunc(queen_agent.writeNewVnaComb(com_to='1.1'), "Sending writeNewVnaComb command...")
-testFunc(queen_agent.vnaSweep(com_to='1.1', N_steps=500), "Sending vnaSweep command...")
+testFunc(queen_agent.vnaSweep(com_to='1.1'), "Sending vnaSweep command...")
 
 
 
